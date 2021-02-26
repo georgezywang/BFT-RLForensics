@@ -139,14 +139,14 @@ class NashQAgent(nn.Module):
                 for agent_2_idx in range(total_choices):
                     print(con_r1.shape)
                     print(payoff_table[agent_2_idx][agent_1_idx])
-                    payoff_table[agent_2_idx][agent_1_idx][1] += con_r1
+                    payoff_table[agent_2_idx][agent_1_idx][1] += int(con_r1)
 
             # updates agent2's
             for agent_2_idx in range(total_choices):
                 agent_2_pq = pq_choices[agent_2_idx]
                 p2, q2, con_r2 = get_pq_and_control_rewards(b_idx, agent_2_pq, agent_id=1)
                 for agent_1_idx in range(total_choices):
-                    payoff_table[agent_2_idx][agent_1_idx][0] += con_r2
+                    payoff_table[agent_2_idx][agent_1_idx][0] += int(con_r2)
 
             eq_1_pq_max_val = -1e9
             eq_2_pq_max_val = -1e9
