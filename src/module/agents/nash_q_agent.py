@@ -28,7 +28,7 @@ class NashQAgent(nn.Module):
 
     def forward(self, batch, t, hidden_states):
         step_inputs, control_inputs = self._build_inputs(batch, t)
-        step_out, step_hidden_states = self.step_estimator(step_inputs)
+        step_out, step_hidden_states = self.step_estimator(step_inputs, hidden_states)
         control_state_out = self.control_estimator(control_inputs)
         pq, pq_vals = self._choose_pq(control_state_out)
         return step_out, pq, pq_vals, control_state_out, step_hidden_states
