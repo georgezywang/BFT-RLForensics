@@ -50,7 +50,7 @@ class NashQAgent(nn.Module):
         # pq: [bs, n_agents, qp]
         # control: [bs, 8]
         rev_pq_dir = {(0, 0): 0, (0, 1): 1, (1, 0): 2, (1, 1): 3}
-        bs = pq.shape(0)
+        bs = pq.shape[0]
         pq_vals = []
         for b_idx in range(bs):
             agent_1_pq = (int(pq[b_idx, 0, 0]), int(pq[b_idx, 0, 1]))
