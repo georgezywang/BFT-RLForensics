@@ -197,9 +197,9 @@ class NashQAgent(nn.Module):
             "FIXME: All agents' actions need to be public knowledge, current onehot-encoded actions input size: {}".format(
                 batch["actions_onehot"].shape))
         if t == 0:
-            step_inputs.append(torch.zeros_like(batch["actions_onehot"][:, t]))
+            step_inputs.append(torch.zeros_like(batch["actions_onehot"][:, t]).reshape(bs, -1).unsqueeze(1).expand(-1, self.n_agents, -1))
         else:
-            step_inputs.append(batch["actions_onehot"][:, t - 1])
+            step_inputs.append(batch["actions_onehot"][:, t - 1].reshape(bs, -1).unsqueeze(1).expand(-1, self.n_agents, -1))
         step_inputs.append(torch.eye(self.n_agents, device=batch.device).unsqueeze(0).expand(bs, -1, -1))
         step_inputs = torch.cat([x.reshape(bs * self.n_agents, -1) for x in step_inputs], dim=1)
 
@@ -209,7 +209,7 @@ class NashQAgent(nn.Module):
     def _get_input_shapes(self, scheme):
         # step reward q estimator: obs + actions_onehot (all agents'!) + n_agents
         # pq control state reward q estimator: control_dim + n_agents
-        step_reward_input_shape = scheme["obs"]["vshape"] + scheme["actions_onehot"]["vshape"][0] + self.n_agents
+        step_reward_input_shape = scheme["obs"]["vshape"] + scheme["actions_onehot"]["vshape"][0]*self.n_agents + self.n_agents
         control_state_reward_input_shape = self.args.control_dim * self.n_agents + self.n_agents
         return step_reward_input_shape, control_state_reward_input_shape
 

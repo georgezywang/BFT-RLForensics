@@ -88,6 +88,9 @@ class GridMaze(MultiAgentEnv):
     def reset(self):
         self.init()
 
+    def close(self):
+        pass
+
     def _generate_map(self, map_filename):
         with open("{}{}".format(MAP_DIR, map_filename), "r") as mapfile:
             lines = mapfile.readlines()
