@@ -137,6 +137,7 @@ class NashQAgent(nn.Module):
                 agent_1_pq = pq_choices[agent_1_idx]
                 p1, q1, con_r1 = get_pq_and_control_rewards(b_idx, agent_1_pq, agent_id=0)
                 for agent_2_idx in range(total_choices):
+                    print(con_r1.shape)
                     print(payoff_table[agent_2_idx][agent_1_idx])
                     payoff_table[agent_2_idx][agent_1_idx][1] += con_r1
 
