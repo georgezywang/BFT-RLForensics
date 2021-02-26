@@ -103,6 +103,7 @@ class NashQLearner:
             self.logger.log_stat("qp_td_error_abs", (qp_masked_td_error.abs().sum().item() / qp_mask_elems), t_env)
             step_mask_elems = step_mask.sum().item()
             self.logger.log_stat("step_error_abs", (masked_step_error.abs().sum().item() / step_mask_elems), t_env)
+            print(pq.shape)
             p1 = pq[:, :, 0, 0]
             q1 = pq[:, :, 0, 1]
             p2 = pq[:, :, 1, 0]
