@@ -19,7 +19,7 @@ class NashQAgent(nn.Module):
         self.n_agents = args.n_agents
         step_input_shape, control_input_shape = self._get_input_shapes(scheme)
         step_output_shape, control_output_shape = self._get_output_shapes(scheme)
-        self.step_estimator = RNNAgent(step_input_shape, step_output_shape, args)
+        # self.step_estimator = RNNAgent(step_input_shape, step_output_shape, args)
         self.control_state_estimator = MLP(self.args.control_estimator_hidden_sizes, control_input_shape,
                                            control_output_shape, args)
 
