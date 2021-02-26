@@ -104,8 +104,8 @@ def run_sequential(args, logger):
         "actions": {"vshape": (1,), "group": "agents", "dtype": th.long},
         "pq": {"vshape": (args.control_dim, ), "group": "agents", "dtype": th.long},
         "avail_actions": {"vshape": (env_info["n_actions"],), "group": "agents", "dtype": th.int},
-        "rewards": {"vshape": env_info["reward_shape"], "group": "agents"},
-        "redistributed_rewards": {"vshape": env_info["reward_shape"], "group": "agents"},
+        "rewards": {"vshape": env_info["reward_shape"], },
+        "redistributed_rewards": {"vshape": env_info["reward_shape"],},
         "terminated": {"vshape": (1,), "dtype": th.uint8},
     }
     groups = {
