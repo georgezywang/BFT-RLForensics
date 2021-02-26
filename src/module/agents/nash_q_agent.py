@@ -124,7 +124,7 @@ class NashQAgent(nn.Module):
         ne = []
         for b_idx in range(bs):
             # builds a payoff table
-            payoff_table = [[(0, 0)] * total_choices] * total_choices
+            payoff_table = [[[0, 0]] * total_choices] * total_choices
             c1 = action_values[b_idx][0]
             c2 = action_values[b_idx][1]
             # paves the step rewards
@@ -137,6 +137,7 @@ class NashQAgent(nn.Module):
                 agent_1_pq = pq_choices[agent_1_idx]
                 p1, q1, con_r1 = get_pq_and_control_rewards(b_idx, agent_1_pq, agent_id=0)
                 for agent_2_idx in range(total_choices):
+                    print(payoff_table[agent_2_idx][agent_1_idx])
                     payoff_table[agent_2_idx][agent_1_idx][1] += con_r1
 
             # updates agent2's
