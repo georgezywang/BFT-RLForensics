@@ -1,6 +1,6 @@
 n_agents: 2
-termination_prob:0.95
-episode_limit: 20,
+termination_prob: 0.95
+episode_limit: 20
 map_filename: "map15.txt"
 blind: True
 redistribute: ((0, 1), (1, 0))
