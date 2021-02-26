@@ -130,7 +130,7 @@ class NashQAgent(nn.Module):
             # paves the step rewards
             for i in range(total_choices):  # agent_2
                 for j in range(total_choices):  # agent_1
-                    payoff_table[i][j] = parse_step_table_values(j, i, c1, c2)
+                    payoff_table[i][j][0], payoff_table[i][j][1] = parse_step_table_values(j, i, c1, c2)
 
             # updates agent1's
             for agent_1_idx in range(total_choices):
