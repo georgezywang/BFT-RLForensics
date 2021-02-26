@@ -33,7 +33,7 @@ class GridMaze(MultiAgentEnv):
         self.step_cnt += 1
 
         for idx in range(self.n_agents):
-            action = actions[idx]
+            action = int(actions[idx])
             current_pos = self.agents_pos[idx]
             goal = self.goals_pos[idx]
             new_pos = (current_pos[0] + directions[action][0], current_pos[1] + directions[action][1])
