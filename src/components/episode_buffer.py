@@ -108,6 +108,8 @@ class EpisodeBatch:
                 v = th.tensor(v, dtype=dtype, device=self.device)
             else:
                 v.to(self.device)
+            print("crash: k {}, v{}".format(k,v))
+            print("shape v :{}, target: {}".format(v.shape, target[k][_slices].shape))
             self._check_safe_view(v, target[k][_slices])
             target[k][_slices] = v.view_as(target[k][_slices])
 
