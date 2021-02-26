@@ -4,7 +4,7 @@ import random
 
 from env.multiagentenv import MultiAgentEnv
 
-MAP_DIR = "map/"
+MAP_DIR = "src/env/unfair_game/map/"
 directions = {0: (1, 0), 1: (0, 1), 2: (-1, 0), 3: (0, -1)}
 
 
