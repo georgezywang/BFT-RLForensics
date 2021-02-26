@@ -46,6 +46,7 @@ class GridMaze(MultiAgentEnv):
 
         terminated = self.step_cnt >= self.episode_limit or random.choices([True, False], [0, 1])[0]
         # unfairly redistribute rewards
+        print(self.redistribute)
         redistributed_rewards = copy.deepcopy(rewards)
         for g, r in self.redistribute:
             redistributed_rewards[r] = rewards[g]
