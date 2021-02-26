@@ -82,14 +82,14 @@ class NashQAgent(nn.Module):
                                [3, 2, 3, 2],
                                [0, 0, 2, 2],
                                [2, 2, 2, 2]]
-        control_table_index = {[0, 1, 0, 1, 0, 1]: 0,
-                               [0, 1, 1, 0, 0, 1]: 1,
-                               [1, 0, 0, 1, 0, 1]: 2,
-                               [1, 0, 1, 0, 0, 1]: 3,
-                               [0, 1, 0, 1, 1, 0]: 4,
-                               [0, 1, 1, 0, 1, 0]: 5,
-                               [1, 0, 0, 1, 1, 0]: 6,
-                               [1, 0, 1, 0, 1, 0]: 7}
+        control_table_index = {(0, 1, 0, 1, 0, 1): 0,
+                               (0, 1, 1, 0, 0, 1): 1,
+                               (1, 0, 0, 1, 0, 1): 2,
+                               (1, 0, 1, 0, 0, 1): 3,
+                               (0, 1, 0, 1, 1, 0): 4,
+                               (0, 1, 1, 0, 1, 0): 5,
+                               (1, 0, 0, 1, 1, 0): 6,
+                               (1, 0, 1, 0, 1, 0): 7}
 
         def get_pq_and_control_rewards(batch_idx, pq_choice, agent_id):
             p = pq_choice[0]
@@ -194,9 +194,12 @@ class NashQAgent(nn.Module):
         step_inputs, control_state_inputs = [], []
         step_inputs.append(batch["obs"][:, t])  # b1av #
         if t == 0:
-            step_inputs.append(torch.zeros_like(batch["actions_onehot"][:, t]).reshape(bs, -1).unsqueeze(1).expand(-1, self.n_agents, -1))
+            step_inputs.append(
+                torch.zeros_like(batch["actions_onehot"][:, t]).reshape(bs, -1).unsqueeze(1).expand(-1, self.n_agents,
+                                                                                                    -1))
         else:
-            step_inputs.append(batch["actions_onehot"][:, t - 1].reshape(bs, -1).unsqueeze(1).expand(-1, self.n_agents, -1))
+            step_inputs.append(
+                batch["actions_onehot"][:, t - 1].reshape(bs, -1).unsqueeze(1).expand(-1, self.n_agents, -1))
         step_inputs.append(torch.eye(self.n_agents, device=batch.device).unsqueeze(0).expand(bs, -1, -1))
         step_inputs = torch.cat([x.reshape(bs * self.n_agents, -1) for x in step_inputs], dim=1)
 
@@ -206,7 +209,8 @@ class NashQAgent(nn.Module):
     def _get_input_shapes(self, scheme):
         # step reward q estimator: obs + actions_onehot (all agents'!) + n_agents
         # pq control state reward q estimator: control_dim + n_agents
-        step_reward_input_shape = scheme["obs"]["vshape"] + scheme["actions_onehot"]["vshape"][0]*self.n_agents + self.n_agents
+        step_reward_input_shape = scheme["obs"]["vshape"] + scheme["actions_onehot"]["vshape"][
+            0] * self.n_agents + self.n_agents
         control_state_reward_input_shape = self.args.control_dim * self.n_agents + self.n_agents
         return step_reward_input_shape, control_state_reward_input_shape
 
