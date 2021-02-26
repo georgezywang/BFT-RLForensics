@@ -12,8 +12,8 @@ import numpy as np
 class EpisodeRunner:
 
     def __init__(self, args, logger):
-        self.n_agents = self.args.n_agents
         self.args = args
+        self.n_agents = self.args.n_agents
         self.logger = logger
         self.batch_size = self.args.batch_size_run
         assert self.batch_size == 1
