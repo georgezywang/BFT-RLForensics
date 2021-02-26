@@ -183,7 +183,7 @@ class NashQAgent(nn.Module):
                   [0, 1, 1, 0, 1, 0],
                   [1, 0, 0, 1, 1, 0],
                   [1, 0, 1, 0, 1, 0]]
-        inputs = torch.tensor(inputs, dtype=torch.long).unsqueeze(0).expand(bs, -1, -1)
+        inputs = torch.tensor(inputs, dtype=torch.float).unsqueeze(0).expand(bs, -1, -1)
         return inputs
 
     def _build_inputs(self, batch, t):
