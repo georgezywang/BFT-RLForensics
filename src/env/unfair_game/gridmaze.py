@@ -9,26 +9,18 @@ directions = {0: (1, 0), 1: (0, 1), 2: (-1, 0), 3: (0, -1)}
 
 
 class GridMaze(MultiAgentEnv):
-    def __init__(self,
-                 n_agents=2,
-                 termination_prob=0.95,
-                 episode_limit=20,
-                 map_filename="map15.txt",
-                 blind=True,
-                 redistribute=None):
-        if redistribute is None:
-            redistribute = []
-        self.n_agents = n_agents
-        self.termination_prob = termination_prob
-        self.episode_limit = episode_limit
-        self.blind = blind
-        self._generate_map(map_filename)
+    def __init__(self, args):
+        self.n_agents = args.n_agents
+        self.termination_prob = args.termination_prob
+        self.episode_limit = args.episode_limit
+        self.blind = args.blind
+        self._generate_map(args.map_filename)
         self.goals_pos = []
         self.agents_pos = []
         self.current_obs = []
-        self.total_actions = 4
+        self.total_actions = args.total_actions
         self.step_cnt = 0
-        self.redistribute = redistribute
+        self.redistribute = args.redistribute
 
     def init(self):
         self.step_cnt = 0
