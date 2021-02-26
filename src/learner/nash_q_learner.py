@@ -61,8 +61,7 @@ class NashQLearner:
 
         for t in range(batch.max_seq_length):
             target_step_out, _, _, target_control_out = self.target_mac.forward(batch, t=t)
-            print(target_control_out)
-            target_ne_vals_out = self.mac.compute_equlibrium(self, raw_control_values=target_control_out,
+            target_ne_vals_out = self.mac.compute_equlibrium(raw_control_values=target_control_out,
                                                              raw_step_values=target_step_out)
             target_mac_ne_out.append(target_ne_vals_out)  # [t,(bs,n,1)]
 
