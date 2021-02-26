@@ -37,17 +37,17 @@ class NashQLearner:
         mac_pq_vals_out = []
         self.mac.init_hidden(batch.batch_size)
 
-        for t in range(batch.max_seq_length):
+        for t in range(batch.max_seq_length-1):
             step_out, _, _, control_state_out = self.mac.forward(batch, t=t)  # (bs,n,n_actions)
             pq_vals_out = self.mac.index_to_pq_vals(pq[:, t], control_state_out)
             mac_step_out.append(step_out)  # [t,(bs,n,n_actions)]
             mac_pq_vals_out.append(pq_vals_out)  # [t, (bs, n)]
         mac_step_out = torch.stack(mac_step_out, dim=1)  # Concat over time
-        chosen_qp_vals = torch.stack(mac_pq_vals_out, dim=1)[:, :-1]
+        chosen_qp_vals = torch.stack(mac_pq_vals_out, dim=1)
         # (bs,t,n,n_actions), Q values of n_actions, ()
 
         # Pick the Q-Values for the actions taken by each agent
-        chosen_action_qvals = torch.gather(mac_step_out[:, :-1], dim=3, index=actions).squeeze(3)  # Remove the last dim
+        chosen_action_qvals = torch.gather(mac_step_out, dim=3, index=actions).squeeze(3)  # Remove the last dim
         # (bs,t,n) Q value of an action
 
         step_error = (chosen_action_qvals - rewards)
