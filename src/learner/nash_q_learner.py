@@ -108,7 +108,7 @@ class NashQLearner:
             q1 = pq[:, :, 0, 1]
             p2 = pq[:, :, 1, 0]
             q2 = pq[:, :, 1, 1]
-            qp_item_mask_elems = mask.clone().expand_as(p1).sum().item()
+            qp_item_mask_elems = mask.squeeze(2).expand_as(p1).sum().item()
             self.logger.log_stat("agent 1 p", (p1.sum().item() / qp_item_mask_elems), t_env)
             self.logger.log_stat("agent 1 q", (q1.sum().item() / qp_item_mask_elems), t_env)
             self.logger.log_stat("agent 2 p", (p2.sum().item() / qp_item_mask_elems), t_env)
