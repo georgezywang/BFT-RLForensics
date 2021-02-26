@@ -193,9 +193,6 @@ class NashQAgent(nn.Module):
         bs = batch.batch_size
         step_inputs, control_state_inputs = [], []
         step_inputs.append(batch["obs"][:, t])  # b1av #
-        print(
-            "FIXME: All agents' actions need to be public knowledge, current onehot-encoded actions input size: {}".format(
-                batch["actions_onehot"].shape))
         if t == 0:
             step_inputs.append(torch.zeros_like(batch["actions_onehot"][:, t]).reshape(bs, -1).unsqueeze(1).expand(-1, self.n_agents, -1))
         else:
