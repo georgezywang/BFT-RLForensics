@@ -13,7 +13,8 @@ class Surviving(MultiAgentEnv):
     def __init__(self, args):
         super(Surviving, self).__init__()
         self.args = args
-        self.redistributed = random.shuffle(list(range(args.n_agents)))
+        self.redistributed = list(range(args.n_agents))
+        random.shuffle(self.redistributed)
         self.episode_limit = args.episode_limit
         self.n_agent = args.n_agents
         self.n_action = 5
@@ -169,11 +170,7 @@ class Surviving(MultiAgentEnv):
                 reward[i] = - 0.2
 
         redistributed_reward = [0] * self.n_agent
-        print(self.redistributed)
         for i in range(self.n_agent):
-            print(redistributed_reward[i])
-            print(self.redistributed[i])
-            print(reward[self.redistributed[i]])
             redistributed_reward[i] = reward[self.redistributed[i]]
 
         done = False
