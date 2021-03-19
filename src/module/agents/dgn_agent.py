@@ -32,11 +32,6 @@ class AttModel(nn.Module):
         v = F.relu(self.fcv(x))
         q = F.relu(self.fcq(x))
         k = F.relu(self.fck(x)).permute(0, 2, 1)
-        print()
-        print(q.shape)
-        print(k.shape)
-        print(mask.shape)
-        print()
         att = F.softmax(torch.mul(torch.bmm(q, k), mask) - 9e15 * (1 - mask), dim=2)
 
         out = torch.bmm(att, v)

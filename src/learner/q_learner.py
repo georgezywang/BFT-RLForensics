@@ -61,18 +61,8 @@ class QLearner:
         # Mask out unavailable actions
         target_mac_out[avail_actions[:, 1:] == 0] = -9999999  # Q values
 
-        # Max over target Q-Values
-        if self.args.double_q:  # True for QMix
-            # Get actions that maximise live Q (for double q-learning)
-            mac_out_detach = mac_out.clone().detach()  # return a new Tensor, detached from the current graph
-            mac_out_detach[avail_actions == 0] = -9999999
-                            # (bs,t,n,n_actions), discard t=0
-            cur_max_actions = mac_out_detach[:, 1:].max(dim=3, keepdim=True)[1] # indices instead of values
-            # (bs,t,n,1)
-            target_max_qvals = th.gather(target_mac_out, 3, cur_max_actions).squeeze(3)
-            # (bs,t,n,n_actions) ==> (bs,t,n,1) ==> (bs,t,n) max target-Q
-        else:
-            target_max_qvals = target_mac_out.max(dim=3)[0]
+
+        target_max_qvals = target_mac_out.max(dim=3)[0]
 
         # Calculate 1-step Q-Learning targets
         targets = rewards + self.args.gamma * (1 - terminated) * target_max_qvals
