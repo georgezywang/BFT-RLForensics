@@ -92,12 +92,14 @@ class EpisodeBatch:
         slices = self._parse_slices((bs, ts))
         for k, v in data.items():
             if k in self.data.transition_data:
+                print("{} is in transition".format(k))
                 target = self.data.transition_data
                 if mark_filled:
                     target["filled"][slices] = 1
                     mark_filled = False
                 _slices = slices
             elif k in self.data.episode_data:
+                print("{} is in episode".format(k))
                 target = self.data.episode_data
                 _slices = slices[0]
             else:
