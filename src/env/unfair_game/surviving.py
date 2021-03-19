@@ -185,7 +185,6 @@ class Surviving(MultiAgentEnv):
         done = False
 
         if (self.maze.sum() + 120) > self.capability:
-            done = True
             return redistributed_reward, done, env_info
 
         for i in range(self.n_resource):
