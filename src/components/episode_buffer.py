@@ -92,15 +92,12 @@ class EpisodeBatch:
         slices = self._parse_slices((bs, ts))
         for k, v in data.items():
             if k in self.data.transition_data:
-                print("{} is in transition".format(k))
                 target = self.data.transition_data
-                print(self.data.transition_data[k])
                 if mark_filled:
                     target["filled"][slices] = 1
                     mark_filled = False
                 _slices = slices
             elif k in self.data.episode_data:
-                print("{} is in episode".format(k))
                 target = self.data.episode_data
                 _slices = slices[0]
             else:
@@ -111,8 +108,8 @@ class EpisodeBatch:
                 v = th.tensor(v, dtype=dtype, device=self.device)
             else:
                 v.to(self.device)
-            print("crash: k {}, v{}".format(k,v))
-            print("shape v :{}, target: {}".format(v.shape, target[k].shape))
+            #print("crash: k {}, v{}".format(k,v))
+            #print("shape v :{}, target: {}".format(v.shape, target[k].shape))
             self._check_safe_view(v, target[k][_slices])
             target[k][_slices] = v.view_as(target[k][_slices])
 
