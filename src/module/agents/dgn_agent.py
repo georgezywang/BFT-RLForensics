@@ -63,5 +63,5 @@ class DGNAgent(nn.Module):
         h2 = self.att_1(h1, mask)
         h3 = self.att_2(h2, mask)
         q = self.q_net(h3)
-        return q
+        return q, []
 
