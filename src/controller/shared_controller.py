@@ -10,7 +10,7 @@ class BasicMAC:
         self.args = args
         self.scheme = scheme
         input_shape = self._get_input_shape(scheme)
-        self._build_agents(input_shape)
+        self._build_agents()
         self.agent_output_type = args.agent_output_type
         self.action_selector = action_REGISTRY[args.action_selector](args)
 
