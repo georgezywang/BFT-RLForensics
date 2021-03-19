@@ -112,7 +112,7 @@ class EpisodeBatch:
             else:
                 v.to(self.device)
             print("crash: k {}, v{}".format(k,v))
-            print("shape v :{}, target: {}".format(v.shape, target[k][_slices].shape))
+            print("shape v :{}, target: {}".format(v.shape, target[k].shape))
             self._check_safe_view(v, target[k][_slices])
             target[k][_slices] = v.view_as(target[k][_slices])
 
