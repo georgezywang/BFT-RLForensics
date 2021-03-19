@@ -61,7 +61,6 @@ class EpisodeRunner:
         while not terminated:
             if self.env.is_masked():
                 pre_transition_data = {
-                    "state": [self.env.get_state()],
                     "avail_actions": [self.env.get_avail_actions()],
                     "obs": [self.env.get_obs()],
                     "adjacent_agents": [self.env.get_adj()],
@@ -97,7 +96,6 @@ class EpisodeRunner:
 
         if self.env.is_masked():
             last_data = {
-                "state": [self.env.get_state()],
                 "avail_actions": [self.env.get_avail_actions()],
                 "obs": [self.env.get_obs()],
                 "adjacent_agents": [self.env.get_adj()],
