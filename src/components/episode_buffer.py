@@ -94,6 +94,7 @@ class EpisodeBatch:
             if k in self.data.transition_data:
                 print("{} is in transition".format(k))
                 target = self.data.transition_data
+                print(self.data.transition_data)
                 if mark_filled:
                     target["filled"][slices] = 1
                     mark_filled = False
