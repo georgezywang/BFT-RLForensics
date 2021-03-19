@@ -98,11 +98,11 @@ def run_sequential(args, logger):
     #    args.own_feature_size+=args.n_agents
 
     # Default/Base scheme
+    # removed pq # FIXME: broke Nash Q Learning
     scheme = {
         #"state": {"vshape": env_info["state_shape"]},
         "obs": {"vshape": env_info["obs_shape"], "group": "agents"},
         "actions": {"vshape": (1,), "group": "agents", "dtype": th.long},
-        "pq": {"vshape": (args.control_dim, ), "group": "agents", "dtype": th.long},
         "avail_actions": {"vshape": (env_info["n_actions"],), "group": "agents", "dtype": th.int},
         "rewards": {"vshape": env_info["reward_shape"], },
         "redistributed_rewards": {"vshape": env_info["reward_shape"],},
