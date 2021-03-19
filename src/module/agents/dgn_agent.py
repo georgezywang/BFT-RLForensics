@@ -51,7 +51,7 @@ class Q_Net(nn.Module):
 class DGNAgent(nn.Module):
     def __init__(self, args, scheme):
         super(DGNAgent, self).__init__()
-        print(scheme["obs"])
+        print(scheme)
         self.encoder = Encoder(scheme["obs"]["vshape"], args.hidden_dim)
         self.att_1 = AttModel(args.n_agents, args.hidden_dim, args.hidden_dim, args.hidden_dim)
         self.att_2 = AttModel(args.n_agents, args.hidden_dim, args.hidden_dim, args.hidden_dim)
