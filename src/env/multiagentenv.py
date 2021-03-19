@@ -30,6 +30,9 @@ class MultiAgentEnv(object):
     def reset(self):
         raise NotImplementedError
 
+    def is_masked(self):
+        raise NotImplementedError
+
     def render(self):
         raise NotImplementedError
 
@@ -50,6 +53,7 @@ class MultiAgentEnv(object):
                     "obs_shape": self.get_obs_size(),
                     "reward_shape": self.n_agents,
                     "n_actions": self.get_total_actions(),
+                    "adjacent_agents_shape": self.n_agents,
                     "n_agents": self.n_agents,
                     "episode_limit": self.episode_limit}
         return env_info

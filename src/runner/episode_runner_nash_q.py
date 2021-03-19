@@ -9,7 +9,7 @@ from components.episode_buffer import EpisodeBatch
 import numpy as np
 
 
-class EpisodeRunner:
+class EpisodeRunnerNashQ:
 
     def __init__(self, args, logger):
         self.args = args
@@ -59,19 +59,11 @@ class EpisodeRunner:
         self.mac.init_hidden(batch_size=self.batch_size)
 
         while not terminated:
-            if self.env.is_masked():
-                pre_transition_data = {
-                    "state": [self.env.get_state()],
-                    "avail_actions": [self.env.get_avail_actions()],
-                    "obs": [self.env.get_obs()],
-                    "adjacent_agents": [self.env.get_adj()],
-                }
-            else:
-                pre_transition_data = {
-                    "state": [self.env.get_state()],
-                    "avail_actions": [self.env.get_avail_actions()],
-                    "obs": [self.env.get_obs()],
-                }
+            pre_transition_data = {
+                "state": [self.env.get_state()],
+                "avail_actions": [self.env.get_avail_actions()],
+                "obs": [self.env.get_obs()]
+            }
 
             self.batch.update(pre_transition_data, ts=self.t)
 
@@ -81,6 +73,12 @@ class EpisodeRunner:
             # pq: [1, agent_num, control_dim]
 
             rewards, terminated, env_info = self.env.step(actions[0])
+            redistributed_rewards = copy.deepcopy(rewards)
+            # FIXME: Only for 2-agent simulation
+            for agent_id in range(self.n_agents):
+                other_id = 1 - agent_id
+                redistributed_rewards[agent_id] += pq[0][agent_id][0]*pq[0][other_id][1]*rewards[other_id]
+                redistributed_rewards[agent_id] -= pq[0][agent_id][1]*pq[0][other_id][0]*rewards[agent_id]
 
             episode_return = [episode_return[idx] + rewards[idx] for idx in range(self.n_agents)]
 
@@ -88,6 +86,7 @@ class EpisodeRunner:
                 "actions": actions,
                 "rewards": rewards,
                 "pq": pq,
+                "redistributed_rewards": redistributed_rewards,
                 "terminated": [(terminated,)],
             }
 
@@ -95,19 +94,11 @@ class EpisodeRunner:
 
             self.t += 1
 
-        if self.env.is_masked():
-            last_data = {
-                "state": [self.env.get_state()],
-                "avail_actions": [self.env.get_avail_actions()],
-                "obs": [self.env.get_obs()],
-                "adjacent_agents": [self.env.get_adj()],
-            }
-        else:
-            last_data = {
-                "state": [self.env.get_state()],
-                "avail_actions": [self.env.get_avail_actions()],
-                "obs": [self.env.get_obs()],
-            }
+        last_data = {
+            "state": [self.env.get_state()],
+            "avail_actions": [self.env.get_avail_actions()],
+            "obs": [self.env.get_obs()]
+        }
         self.batch.update(last_data, ts=self.t)
 
         # Select actions in the last stored state
