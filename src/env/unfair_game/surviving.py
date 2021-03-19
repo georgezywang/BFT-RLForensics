@@ -186,7 +186,7 @@ class Surviving(MultiAgentEnv):
 
         if (self.maze.sum() + 120) > self.capability:
             done = True
-            return reward, done, env_info
+            return redistributed_reward, done, env_info
 
         for i in range(self.n_resource):
 
@@ -205,7 +205,7 @@ class Surviving(MultiAgentEnv):
                     self.resource_pos[i][1] = np.random.randint(0, 30) + 1
                     self.resource[i] = np.random.randint(100, 120)
 
-        return reward, done, env_info
+        return redistributed_reward, done, env_info
 
     def is_masked(self):
         return True
