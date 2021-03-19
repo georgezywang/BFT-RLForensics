@@ -200,7 +200,6 @@ class Surviving(MultiAgentEnv):
 
     def get_env_info(self):
         env_info = {
-                    "state_shape": self.get_state_size(),
                     "obs_shape": self.get_obs_size(),
                     "reward_shape": self.n_agents,
                     "n_actions": self.get_total_actions(),
