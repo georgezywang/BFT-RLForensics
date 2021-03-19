@@ -143,7 +143,7 @@ class Surviving(MultiAgentEnv):
         return adj
 
     def step(self, actions):
-        env_info = []
+        env_info = {}
 
         self.steps += 1
         if self.steps >= self.episode_limit:
