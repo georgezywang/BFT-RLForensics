@@ -13,6 +13,7 @@ class Surviving(MultiAgentEnv):
     def __init__(self, args):
         super(Surviving, self).__init__()
         self.redistributed = random.shuffle(list(range(args.n_agents)))
+        self.episode_limit = args.episode_limit
         self.n_agent = args.n_agents
         self.n_action = 5
         self.max_food = args.max_food
