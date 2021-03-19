@@ -58,6 +58,8 @@ class Surviving(MultiAgentEnv):
             self.resource_pos.append([np.random.randint(0, 30) + 1, np.random.randint(0, 30) + 1])
             self.resource.append(np.random.randint(100, 120))
 
+        self.steps = 0
+
     def build_env(self):
 
         maze = np.zeros((32, 32))
@@ -142,6 +144,13 @@ class Surviving(MultiAgentEnv):
 
     def step(self, actions):
         env_info = []
+
+        self.steps += 1
+        if self.steps >= self.episode_limit:
+            reward = [0.0] * self.n_agent
+            done = True
+            return reward, done, env_info
+
         for i in range(self.n_agent):
             x = self.ants[i][0]
             y = self.ants[i][1]
@@ -176,6 +185,7 @@ class Surviving(MultiAgentEnv):
         done = False
 
         if (self.maze.sum() + 120) > self.capability:
+            done = True
             return reward, done, env_info
 
         for i in range(self.n_resource):
