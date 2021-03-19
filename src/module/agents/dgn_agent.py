@@ -30,6 +30,8 @@ class AttModel(nn.Module):
         mask = mask.unsqueeze(0)
         v = F.relu(self.fcv(x))
         q = F.relu(self.fcq(x))
+        print(x.shape)
+        print(mask.shape)
         k = F.relu(self.fck(x)).permute(0, 2, 1)
         att = F.softmax(torch.mul(torch.bmm(q, k), mask) - 9e15 * (1 - mask), dim=2)
 
