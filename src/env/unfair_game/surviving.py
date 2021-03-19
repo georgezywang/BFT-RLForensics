@@ -12,6 +12,7 @@ def is_legal(x, y):
 class Surviving(MultiAgentEnv):
     def __init__(self, args):
         super(Surviving, self).__init__()
+        self.args = args
         self.redistributed = random.shuffle(list(range(args.n_agents)))
         self.episode_limit = args.episode_limit
         self.n_agent = args.n_agents
@@ -201,9 +202,9 @@ class Surviving(MultiAgentEnv):
     def get_env_info(self):
         env_info = {
                     "obs_shape": self.get_obs_size(),
-                    "reward_shape": self.n_agents,
+                    "reward_shape": self.args.n_agents,
                     "n_actions": self.get_total_actions(),
-                    "adjacent_agents_shape": self.n_agents,
-                    "n_agents": self.n_agents,
+                    "adjacent_agents_shape": self.args.n_agents,
+                    "n_agents": self.args.n_agents,
                     "episode_limit": self.episode_limit}
         return env_info
