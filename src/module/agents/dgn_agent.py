@@ -58,12 +58,14 @@ class Q_Net(nn.Module):
 class DGNAgent(nn.Module):
     def __init__(self, args, scheme):
         super(DGNAgent, self).__init__()
+        self.args = args
         self.encoder = Encoder(scheme["obs"]["vshape"], args.hidden_dim)
         self.att_1 = AttModel(args.n_agents, args.hidden_dim, args.hidden_dim, args.hidden_dim)
         self.att_2 = AttModel(args.n_agents, args.hidden_dim, args.hidden_dim, args.hidden_dim)
         self.q_net = Q_Net(args.hidden_dim, args.n_actions)
 
     def forward(self, x, mask, _):
+        x = x.view(mask.shape[0], self.args.n_agents, -1)
         h1 = self.encoder(x)
         h2 = self.att_1(h1, mask)
         h3 = self.att_2(h2, mask)
