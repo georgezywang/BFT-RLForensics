@@ -169,6 +169,7 @@ class Surviving(MultiAgentEnv):
                 reward[i] = - 0.2
 
         redistributed_reward = [0] * self.n_agent
+        print(self.redistributed)
         for i in range(self.n_agent):
             print(redistributed_reward[i])
             print(self.redistributed[i])
