@@ -27,6 +27,7 @@ class AttModel(nn.Module):
         self.fcout = nn.Linear(hidden_dim, dout)
 
     def forward(self, x, mask):
+        mask = mask.unsqueeze(0)
         v = F.relu(self.fcv(x))
         q = F.relu(self.fcq(x))
         k = F.relu(self.fck(x)).permute(0, 2, 1)
