@@ -1,6 +1,7 @@
-from module.agents import REGISTRY as agent_REGISTRY
-from components.action_selectors import REGISTRY as action_REGISTRY
 import torch as th
+
+from components.action_selectors import EpsilonGreedyActionSelector
+from module.agents import REGISTRY as agent_REGISTRY
 
 
 # This multi-agent controller shares parameters between agents
@@ -12,7 +13,7 @@ class BasicMAC:
         input_shape = self._get_input_shape(scheme)
         self._build_agents()
         self.agent_output_type = args.agent_output_type
-        self.action_selector = action_REGISTRY[args.action_selector](args)
+        self.action_selector = EpsilonGreedyActionSelector(args)
 
         self.hidden_states = None
 
