@@ -76,7 +76,7 @@ class EpisodeRunner:
 
             # Pass the entire batch of experiences up till now to the agents
             # Receive the actions for each agent at this timestep in a batch of size 1
-            actions, pq = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
+            actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
             # pq: [1, agent_num, control_dim]
 
             rewards, terminated, env_info = self.env.step(actions[0])
@@ -86,7 +86,6 @@ class EpisodeRunner:
             post_transition_data = {
                 "actions": actions,
                 "rewards": rewards,
-                "pq": pq,
                 "terminated": [(terminated,)],
             }
 
@@ -109,9 +108,8 @@ class EpisodeRunner:
         self.batch.update(last_data, ts=self.t)
 
         # Select actions in the last stored state
-        actions, pq = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
-        self.batch.update({"actions": actions,
-                           "pq": pq}, ts=self.t)
+        actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
+        self.batch.update({"actions": actions,}, ts=self.t)
 
         cur_stats = self.test_stats if test_mode else self.train_stats
         cur_returns = self.test_returns if test_mode else self.train_returns
