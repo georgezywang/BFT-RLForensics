@@ -371,7 +371,7 @@ def run_pq_sequential(args, logger):
             else:
                 v.to(device)
             train_batch.update({k: v})
-        learner.pq_train(train_batch, device)
+        learner.pq_train(train_batch, device, pq_training_cnt)
         pq_training_cnt += 1
 
         t_max = args.env_steps_every_pq * args.max_pq_training_steps
