@@ -63,8 +63,6 @@ class EpisodeBatch:
             episode_const = field_info.get("episode_const", False)
             group = field_info.get("group", None)
             dtype = field_info.get("dtype", th.float32)
-            print("field_key {}, field_info {}".format(field_key, field_info))
-            print("vshape {}, group {}".format(vshape, group))
 
             if isinstance(vshape, int):
                 vshape = (vshape,)
@@ -72,14 +70,8 @@ class EpisodeBatch:
             if group:
                 assert group in groups, "Group {} must have its number of members defined in _groups_".format(group)
                 shape = (groups[group], *vshape)
-                if field_key == "p":
-                    print("group")
-                    print(vshape)
             else:
                 shape = vshape
-            if field_key == "p":
-                print("in creation")
-                print(shape)
 
             if episode_const:
                 self.data.episode_data[field_key] = th.zeros((batch_size, *shape), dtype=dtype, device=self.device)
@@ -105,23 +97,19 @@ class EpisodeBatch:
                     target["filled"][slices] = 1
                     mark_filled = False
                 _slices = slices
-                print("transition target: {}".format(target["p"].shape))
             elif k in self.data.episode_data:
                 target = self.data.episode_data
                 _slices = slices[0]
-                print("episode target: {}".format(target["p"].shape))
             else:
                 raise KeyError("{} not found in transition or episode data".format(k))
 
-            print("crash: k {}, v{}".format(k, v))
             dtype = self.scheme[k].get("dtype", th.float32)
-            print(type(v))
             if not isinstance(v, th.Tensor):
                 v = th.tensor(v, dtype=dtype, device=self.device)
             else:
                 v.to(self.device)
             #print("crash: k {}, v{}".format(k,v))
-            print("shape v :{}, target: {}".format(v.shape, target[k].shape))
+            #print("shape v :{}, target: {}".format(v.shape, target[k].shape))
             self._check_safe_view(v, target[k][_slices])
             target[k][_slices] = v.view_as(target[k][_slices])
 
