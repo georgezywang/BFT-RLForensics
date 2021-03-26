@@ -10,4 +10,16 @@ env_steps_every_pq: 40000
 max_pq_training_steps: 10000
 pq_sample_runs: 400
 
+epsilon_start: 1.0
+epsilon_finish: 0.05
+epsilon_anneal_time: 50000
+
+buffer_size: 5000
+
+# update the target network every {} episodes
+target_update_interval: 200
+
+# use the Q_Learner to train
+agent_output_type: "q"
+
 name: "pq_dgn_q_learning"
