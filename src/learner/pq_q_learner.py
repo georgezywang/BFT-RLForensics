@@ -70,7 +70,7 @@ class BaiscPQ_QLearner:
 
     def action_train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
-        rewards = batch["rewards"][:, :-1]
+        rewards = batch["redistributed_rewards"][:, :-1]
         actions = batch["actions"][:, :-1]
         terminated = batch["terminated"][:, :-1].float()
         mask = batch["filled"][:, :-1].float()
