@@ -144,3 +144,4 @@ class FlattenMLP(MLP):
 class MLPEncoder(FlattenMLP):
     def reset(self, num_task=1):
         pass
+

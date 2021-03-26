@@ -19,7 +19,7 @@ class BasicPQMAC(BasicMAC):
         self.action_selector = EpsilonGreedyActionSelector(args)
         self.hidden_states = None
 
-    def select_pqs(self, batch_size, device, test_mode):
+    def select_pqs(self, batch_size, device, eps_num, test_mode):
         p_outs, q_outs = self.pq_forward(batch_size, device, test_mode)
         # agent actions
         if self.args.pq_output_type == "pi_logits":
@@ -36,9 +36,9 @@ class BasicPQMAC(BasicMAC):
                 q_outs = ((1 - self.action_selector.epsilon) * q_outs
                           + torch.ones_like(q_outs) * self.action_selector.epsilon / epsilon_action_num)
 
-        p = p_outs.view(batch_size, self.n_agents, -1)
-        q = q_outs.view(batch_size, self.n_agents, -1)
-        return p, q
+        p, q = self.action_selector.select_individuak_pq_values(p_outs, q_outs, eps_num,
+                                                                    test_mode=test_mode)
+        return self._one_hot_embedding(p, self.args.n_agents), self._one_hot_embedding(q, self.args.n_agents)
 
     def pq_forward(self, batch_size, device, test_mode=False):
         # inputs: actor_id
@@ -102,5 +102,17 @@ class BasicPQMAC(BasicMAC):
         inputs = th.cat([x.reshape(bs*self.n_agents, -1) for x in inputs], dim=1)
         return inputs
 
+    def _one_hot_embedding(self, labels, num_classes):
+        """Embedding labels to one-hot form.
+
+        Args:
+          labels: (LongTensor) class labels, sized [N,].
+          num_classes: (int) number of classes.
+
+        Returns:
+          (tensor) encoded labels, sized [N, #classes].
+        """
+        y = torch.eye(num_classes)
+        return y[labels]
 
 

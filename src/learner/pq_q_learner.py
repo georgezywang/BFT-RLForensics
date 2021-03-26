@@ -36,6 +36,15 @@ class BaiscPQ_QLearner:
         bs = batch["p"].shape[0]
         p = batch["p"]  # [batch_size, n_agent, n_agent]
         q = batch["q"]  # [batch_size, n_agent, n_agent]
+        p = torch.argmax(p, dim=-1).reshape(-1, 1)
+        q = torch.argmax(q, dim=-1).reshape(-1, 1)
+
+        p_pi, q_pi = self.mac.pq_forward(self, bs, device, test_mode=False)
+        p_pi = p_pi.reshape(-1, self.args.n_agents)
+        q_pi = q_pi.reshape(-1, self.args.n_agents)
+
+        p_pi_taken = th.gather(p_pi, dim=1, index=p).squeeze(1)
+        q_pi_taken = th.gather(q_pi, dim=1, index=q).squeeze(1)
 
         # train pq critic
         pq_vals = self.pq_critic(batch, device)
@@ -45,8 +54,8 @@ class BaiscPQ_QLearner:
         self.logger.log_stat("pq_critic_loss", pq_critic_loss.item(), t_env)
 
         # train pq actor
-        log_p = torch.log(p)
-        log_q = torch.log(q)
+        log_p = torch.log(p_pi_taken)
+        log_q = torch.log(q_pi_taken)
         p_loss = (log_p * pq_vals.detach()).sum()/bs
         q_loss = (log_q * pq_vals.detach()).sum()/bs
 

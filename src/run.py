@@ -336,7 +336,7 @@ def run_pq_sequential(args, logger):
         buffer = ReplayBuffer(scheme, groups, args.buffer_size, env_info["episode_limit"] + 1,
                               preprocess=preprocess,
                               device=device)
-        p, q = mac.select_pqs(1, device, test_mode=False)
+        p, q = mac.select_pqs(batch_size=1, device=device, eps_num=pq_training_cnt, test_mode=False)
         env_steps_every_pq_max += args.env_steps_every_pq
         while runner.t_env <= env_steps_every_pq_max:
             # Run for a whole episode at a time
