@@ -97,11 +97,11 @@ class EpisodeBatch:
                     target["filled"][slices] = 1
                     mark_filled = False
                 _slices = slices
-                print("transition target: {}".format(target))
+                print("transition target: {}".format(target["p"].shape))
             elif k in self.data.episode_data:
                 target = self.data.episode_data
                 _slices = slices[0]
-                print("episode target: {}".format(target))
+                print("episode target: {}".format(target["p"].shape))
             else:
                 raise KeyError("{} not found in transition or episode data".format(k))
 
