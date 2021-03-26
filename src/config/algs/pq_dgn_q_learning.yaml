@@ -2,6 +2,7 @@ meta_type: "pq"
 p_actor: "pq_agent"
 q_actor: "pq_agent"
 pq_actor_hidden_sizes: [32]
+critic_hidden_sizes: [32]
 pq_output_type: "pi_logits"
 learner: "pq_q_learner"
 runner: "pq_episode"
