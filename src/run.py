@@ -337,6 +337,8 @@ def run_pq_sequential(args, logger):
                               preprocess=preprocess,
                               device=device)
         p, q = mac.select_pqs(args.batch_size, device, test_mode=False)
+        print(p.shape)
+        print(q.shape)
         env_steps_every_pq_max += args.env_steps_every_pq
         while runner.t_env <= env_steps_every_pq_max:
             # Run for a whole episode at a time
