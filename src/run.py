@@ -355,7 +355,7 @@ def run_pq_sequential(args, logger):
                 if episode_sample.device != args.device:
                     episode_sample.to(args.device)
 
-            learner.action_train(episode_sample, runner.t_env, episode)
+                learner.action_train(episode_sample, runner.t_env, episode)
 
         episode_returns = []
         for _ in range(args.pq_sample_runs):
