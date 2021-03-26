@@ -57,6 +57,7 @@ class PQEpisodeRunner:
 
         terminated = False
         episode_return = [0] * self.n_agents
+        distributed_return = [0] * self.n_agents
         self.mac.init_hidden(batch_size=self.batch_size)
 
         while not terminated:
@@ -92,7 +93,7 @@ class PQEpisodeRunner:
                     distributed_rewards[receiver] = rewards[giver]*math.sqrt(w)
                     # hopefully that doesn't lose too much rewards
             episode_return = [episode_return[idx] + rewards[idx] for idx in range(self.n_agents)]
-
+            distributed_return = [distributed_return[idx] + distributed_rewards[idx] for idx in range(self.n_agents)]
             post_transition_data = {
                 "actions": actions,
                 "rewards": rewards,
@@ -128,6 +129,7 @@ class PQEpisodeRunner:
 
         cur_stats = self.test_stats if test_mode else self.train_stats
         cur_returns = self.test_returns if test_mode else self.train_returns
+        cur_dis_returns = []
         log_prefix = "test_" if test_mode else ""
         cur_stats.update({k: cur_stats.get(k, 0) + env_info.get(k, 0) for k in set(cur_stats) | set(env_info)})
         cur_stats["n_episodes"] = 1 + cur_stats.get("n_episodes", 0)
@@ -137,11 +139,11 @@ class PQEpisodeRunner:
             self.t_env += self.t
 
         cur_returns.append(episode_return)
-
+        cur_dis_returns.append(distributed_return)
         if test_mode and (len(self.test_returns) == self.args.test_nepisode):
-            self._log(cur_returns, cur_stats, log_prefix)
+            self._log(cur_returns, cur_dis_returns, cur_stats, log_prefix)
         elif self.t_env - self.log_train_stats_t >= self.args.runner_log_interval:
-            self._log(cur_returns, cur_stats, log_prefix)
+            self._log(cur_returns, cur_dis_returns, cur_stats, log_prefix)
             if hasattr(self.mac.action_selector, "epsilon"):
                 self.logger.log_stat("epsilon", self.mac.action_selector.epsilon, self.t_env)
             self.log_train_stats_t = self.t_env
@@ -152,12 +154,19 @@ class PQEpisodeRunner:
             return self.batch
 
 
-    def _log(self, returns, stats, prefix):
+    def _log(self, returns, dis_returns, stats, prefix):
+        for agent_idx in range(self.n_agents):
+            agent_returns = [dis_returns[t][agent_idx] for t in range(len(dis_returns))]
+            self.logger.log_stat(prefix + "agent {} post-sharing return_mean".format(agent_idx), np.mean(agent_returns), self.t_env)
+            self.logger.log_stat(prefix + "agent {} post-sharing return_std".format(agent_idx), np.std(agent_returns), self.t_env)
+
         for agent_idx in range(self.n_agents):
             agent_returns = [returns[t][agent_idx] for t in range(len(returns))]
-            self.logger.log_stat(prefix + "agent {} return_mean".format(agent_idx), np.mean(agent_returns), self.t_env)
-            self.logger.log_stat(prefix + "agent {} return_std".format(agent_idx), np.std(agent_returns), self.t_env)
+            self.logger.log_stat(prefix + "agent {} original return_mean".format(agent_idx), np.mean(agent_returns), self.t_env)
+            self.logger.log_stat(prefix + "agent {} original return_std".format(agent_idx), np.std(agent_returns), self.t_env)
+
         returns.clear()
+        dis_returns.clear()
 
         for k, v in stats.items():
             if k != "n_episodes":
