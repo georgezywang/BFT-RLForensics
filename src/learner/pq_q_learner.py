@@ -33,6 +33,7 @@ class BaiscPQ_QLearner:
         self.log_stats_t = -self.args.learner_log_interval - 1
 
     def pq_train(self, batch, device, t_env):
+        bs = batch["p"].shape[0]
         p = batch["p"]  # [batch_size, n_agent, n_agent]
         q = batch["q"]  # [batch_size, n_agent, n_agent]
 
@@ -40,14 +41,14 @@ class BaiscPQ_QLearner:
         pq_vals = self.pq_critic(batch, device)
         pq_targets = batch["evals"]
         pq_critic_loss = pq_vals - pq_targets
-        pq_critic_loss = (pq_critic_loss ** 2).sum()
+        pq_critic_loss = (pq_critic_loss ** 2).sum()/bs
         self.logger.log_stat("pq_critic_loss", pq_critic_loss.item(), t_env)
 
         # train pq actor
         log_p = torch.log(p)
         log_q = torch.log(q)
-        p_loss = (log_p * pq_vals.detach()).sum()
-        q_loss = (log_q * pq_vals.detach()).sum()
+        p_loss = (log_p * pq_vals.detach()).sum()/bs
+        q_loss = (log_q * pq_vals.detach()).sum()/bs
 
         loss = pq_critic_loss + p_loss + q_loss
         self.pq_optimiser.zero_grad()
