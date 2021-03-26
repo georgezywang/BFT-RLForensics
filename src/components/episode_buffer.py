@@ -63,6 +63,8 @@ class EpisodeBatch:
             episode_const = field_info.get("episode_const", False)
             group = field_info.get("group", None)
             dtype = field_info.get("dtype", th.float32)
+            print("field_key {}, field_info {}".format(field_key, field_info))
+            print("vshape {}, group {}".format(vshape, group))
 
             if isinstance(vshape, int):
                 vshape = (vshape,)
