@@ -67,13 +67,15 @@ class EpsilonGreedyActionSelector():
             self.epsilon = 0.0
 
         random_numbers = torch.rand_like(raw_p, dtype=torch.float)
-        pick_random = (random_numbers < self.epsilon).long()
+        pick_random = (random_numbers < epsilon).long()
         prob = torch.tensor([0.5, 0.5])
         random_p = torch.tensor((Categorical(prob).sample().long(), Categorical(prob).sample().long()))
+        print(raw_p.shape)
+        print(random_p.shape)
         picked_p = pick_random * random_p + (1 - pick_random) * raw_p
 
         random_numbers = torch.rand_like(raw_q, dtype=torch.float)
-        pick_random = (random_numbers < self.epsilon).long()
+        pick_random = (random_numbers < epsilon).long()
         prob = torch.tensor([0.5, 0.5])
         random_q = torch.tensor((Categorical(prob).sample().long(), Categorical(prob).sample().long()))
         picked_q = pick_random * random_q + (1 - pick_random) * raw_q
