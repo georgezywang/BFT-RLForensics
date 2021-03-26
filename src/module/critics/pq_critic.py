@@ -31,17 +31,16 @@ class PQCritic(nn.Module):
             layer_norm_params=None,
         )
 
-    def forward(self, batch, t):
-        inputs = self._build_inputs(batch, t)
+    def forward(self, batch):
+        inputs = self._build_inputs(batch)
         bs = batch.batch_size
         # print("sc control critic actual input:{}".format(inputs.shape))
         return self.critic(inputs).reshape(bs, self.n_agents)
 
-    def _build_inputs(self, batch, t):
+    def _build_inputs(self, batch):
         # assume latent_state: [bs, latent_state_size]
         # obs: [bs, seq_len, n_agents, obs_size]
         bs = batch.batch_size
-        ts = slice(t, t + 1)
         inputs = []
 
         # keys, queries and rules
