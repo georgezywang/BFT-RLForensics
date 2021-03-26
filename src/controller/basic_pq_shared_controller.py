@@ -49,6 +49,8 @@ class BasicPQMAC(BasicMAC):
         p_inputs, q_inputs = self._build_pq_inputs(batch_size, device)
         p_outs = self.p_actor(p_inputs)
         q_outs = self.q_actor(q_inputs)
+        p_outs = torch.nn.functional.softmax(p_outs, dim=-1)
+        q_outs = torch.nn.functional.softmax(q_outs, dim=-1)
         return p_outs, q_outs
 
     def pq_parameters(self):
