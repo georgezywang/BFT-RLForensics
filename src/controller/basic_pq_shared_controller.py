@@ -38,11 +38,11 @@ class BasicPQMAC(BasicMAC):
             q_outs = torch.nn.functional.softmax(q_outs, dim=-1)
         p = Categorical(p_outs).sample()
         q = Categorical(q_outs).sample()
-        print(p)
-        print(q)
-        print(self._one_hot_embedding(p, self.args.n_agents))
-        print(self._one_hot_embedding(q, self.args.n_agents))
-        return self._one_hot_embedding(p, self.args.n_agents), self._one_hot_embedding(q, self.args.n_agents)
+        # print(p)
+        # print(q)
+        # print(self._one_hot_embedding(p, self.args.n_agents))
+        # print(self._one_hot_embedding(q, self.args.n_agents))
+        return self._one_hot_embedding(p, self.args.n_agents).unsqueeze(0), self._one_hot_embedding(q, self.args.n_agents).unsqueeze(0)
 
     def pq_forward(self, batch_size, device, test_mode=False):
         # inputs: actor_id
