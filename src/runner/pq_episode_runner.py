@@ -88,8 +88,9 @@ class PQEpisodeRunner:
             distributed_rewards = [0] * self.n_agents
             for receiver in range(self.n_agents):
                 for giver in range(self.n_agents):
-                    print(type(p[0][receiver][giver]))
-                    distributed_rewards[receiver] = rewards[giver]*math.sqrt(p[0][receiver][giver]*q[0][giver][receiver])
+                    w = p[0][receiver][giver]*q[0][giver][receiver]
+                    w = w.numpy()
+                    distributed_rewards[receiver] = rewards[giver]*math.sqrt(w)
                     # hopefully that doesn't lose too much rewards
             episode_return = [episode_return[idx] + rewards[idx] for idx in range(self.n_agents)]
 
