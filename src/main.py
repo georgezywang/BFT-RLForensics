@@ -7,6 +7,8 @@ import os
 import collections
 from os.path import dirname, abspath
 from copy import deepcopy
+
+import torch
 from sacred import Experiment, SETTINGS
 from sacred.observers import FileStorageObserver
 from sacred.utils import apply_backspaces_and_linefeeds
