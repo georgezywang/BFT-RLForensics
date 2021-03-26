@@ -32,12 +32,12 @@ class BaiscPQ_QLearner:
         self.pq_training_steps = 0
         self.log_stats_t = -self.args.learner_log_interval - 1
 
-    def pq_train(self, batch, running_log=None):
+    def pq_train(self, batch, device, running_log=None):
         p = batch["p"]  # [batch_size, n_agent, n_agent]
         q = batch["q"]  # [batch_size, n_agent, n_agent]
 
         # train pq critic
-        pq_vals = self.pq_critic(batch)
+        pq_vals = self.pq_critic(batch, device)
         pq_targets = batch["evals"]
         pq_critic_loss = pq_vals - pq_targets
         pq_critic_loss = (pq_critic_loss ** 2).sum()

@@ -31,16 +31,16 @@ class PQCritic(nn.Module):
             layer_norm_params=None,
         )
 
-    def forward(self, batch):
-        inputs = self._build_inputs(batch)
-        bs = batch.batch_size
+    def forward(self, batch, device):
+        inputs = self._build_inputs(batch, device)
+        bs = batch["p"].shape[0]
         # print("sc control critic actual input:{}".format(inputs.shape))
         return self.critic(inputs).reshape(bs, self.n_agents)
 
-    def _build_inputs(self, batch):
+    def _build_inputs(self, batch, device):
         # assume latent_state: [bs, latent_state_size]
         # obs: [bs, seq_len, n_agents, obs_size]
-        bs = batch.batch_size
+        bs = batch["p"].shape[0]
         inputs = []
 
         # keys, queries and rules
@@ -50,7 +50,7 @@ class PQCritic(nn.Module):
         inputs.append(q_s)
 
         # agent_id
-        agent_id = torch.eye(self.n_agents, device=batch.device).unsqueeze(0).expand(bs, -1, -1)
+        agent_id = torch.eye(self.n_agents, device=device).unsqueeze(0).expand(bs, -1, -1)
         inputs.append(agent_id)
 
         inputs = torch.cat([x.reshape(bs*self.n_agents, -1) for x in inputs], dim=-1)
