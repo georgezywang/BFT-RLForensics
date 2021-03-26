@@ -39,7 +39,7 @@ class BaiscPQ_QLearner:
         p = torch.argmax(p, dim=-1).reshape(-1, 1)
         q = torch.argmax(q, dim=-1).reshape(-1, 1)
 
-        p_pi, q_pi = self.mac.pq_forward(self, bs, device, test_mode=False)
+        p_pi, q_pi = self.mac.pq_forward(bs, device, test_mode=False)
         p_pi = p_pi.reshape(-1, self.args.n_agents)
         q_pi = q_pi.reshape(-1, self.args.n_agents)
 
