@@ -23,7 +23,10 @@ def time_left(start_time, t_start, t_current, t_max):
         return "-"
     time_elapsed = time.time() - start_time
     t_current = max(1, t_current)
-    time_left = time_elapsed * (t_max - t_current) / (t_current - t_start)
+    if abs(t_current - t_start) < 0.0000001:
+        time_left = 60 * 60 * 24 * 100
+    else:
+        time_left = time_elapsed * (t_max - t_current) / (t_current - t_start)
     # Just in case its over 100 days
     time_left = min(time_left, 60 * 60 * 24 * 100)
     return time_str(time_left)
