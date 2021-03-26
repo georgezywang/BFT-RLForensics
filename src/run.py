@@ -370,7 +370,7 @@ def run_pq_sequential(args, logger):
                 v = th.tensor(v, dtype=th.long, device=device)
             else:
                 v.to(device)
-            train_batch.update({k, v})
+            train_batch.update({k: v})
         learner.pq_train(train_batch)
         pq_training_cnt += 1
 
