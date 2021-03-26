@@ -70,8 +70,12 @@ class EpisodeBatch:
             if group:
                 assert group in groups, "Group {} must have its number of members defined in _groups_".format(group)
                 shape = (groups[group], *vshape)
+                print("group")
             else:
                 shape = vshape
+            if field_key == "p":
+                print("in creation")
+                print(shape)
 
             if episode_const:
                 self.data.episode_data[field_key] = th.zeros((batch_size, *shape), dtype=dtype, device=self.device)
