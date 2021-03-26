@@ -74,7 +74,7 @@ class DGNAgent(nn.Module):
             input_shape += scheme["actions_onehot"]["vshape"][0]
         if self.args.obs_agent_id:
             input_shape += self.n_agents
-        if self.args.type == "pq":
+        if self.args.meta_type == "pq":
             input_shape += self.n_agents*self.n_agents*2
         return input_shape
 

@@ -51,7 +51,7 @@ def run(_run, _config, _log):
     logger.setup_sacred(_run)
 
     # Run and train
-    if args.type == "pq":
+    if args.meta_type == "pq":
         run_pq_sequential(args=args, logger=logger)
     else:
         run_sequential(args=args, logger=logger)
