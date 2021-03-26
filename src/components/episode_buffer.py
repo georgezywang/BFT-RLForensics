@@ -70,7 +70,9 @@ class EpisodeBatch:
             if group:
                 assert group in groups, "Group {} must have its number of members defined in _groups_".format(group)
                 shape = (groups[group], *vshape)
-                print("group")
+                if field_key == "p":
+                    print("group")
+                    print(vshape)
             else:
                 shape = vshape
             if field_key == "p":
