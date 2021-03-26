@@ -361,7 +361,7 @@ def run_pq_sequential(args, logger):
                 last_log_T = runner.t_env
 
         episode_returns = []
-        for _ in range(args.pq_sample_runs):
+        for _ in range(1):#args.pq_sample_runs):
             episode_returns.append(runner.run(p, q, test_mode=True, sample_mode=True))
         data = {"p": p, "q": q, "evals": episode_returns}
         train_batch = {}
