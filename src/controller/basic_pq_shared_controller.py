@@ -1,5 +1,6 @@
 import torch
 import torch as th
+from torch.distributions import Categorical
 
 from components.action_selectors import EpsilonGreedyActionSelector
 from controller.shared_controller import BasicMAC
@@ -22,22 +23,22 @@ class BasicPQMAC(BasicMAC):
     def select_pqs(self, batch_size, device, eps_num, test_mode):
         p_outs, q_outs = self.pq_forward(batch_size, device, test_mode)
         # agent actions
-        if self.args.pq_output_type == "pi_logits":
+
+        if not test_mode:
+            # Epsilon floor
+            epsilon_action_num = p_outs.size(-1)
+            # FIXME: own exploration probability
+            # With probability epsilon, we will pick an available action uniformly
+            p_outs = ((1 - self.action_selector.epsilon) * p_outs
+                      + torch.ones_like(p_outs) * self.action_selector.epsilon / epsilon_action_num)
+            q_outs = ((1 - self.action_selector.epsilon) * q_outs
+                      + torch.ones_like(q_outs) * self.action_selector.epsilon / epsilon_action_num)
 
             p_outs = torch.nn.functional.softmax(p_outs, dim=-1)
             q_outs = torch.nn.functional.softmax(q_outs, dim=-1)
-            if not test_mode:
-                # Epsilon floor
-                epsilon_action_num = p_outs.size(-1)
-                # FIXME: own exploration probability
-                # With probability epsilon, we will pick an available action uniformly
-                p_outs = ((1 - self.action_selector.epsilon) * p_outs
-                          + torch.ones_like(p_outs) * self.action_selector.epsilon / epsilon_action_num)
-                q_outs = ((1 - self.action_selector.epsilon) * q_outs
-                          + torch.ones_like(q_outs) * self.action_selector.epsilon / epsilon_action_num)
+        p = Categorical(p_outs).sample()
+        q = Categorical(q_outs).sample()
 
-        p, q = self.action_selector.select_individuak_pq_values(p_outs, q_outs, eps_num,
-                                                                    test_mode=test_mode)
         return self._one_hot_embedding(p, self.args.n_agents), self._one_hot_embedding(q, self.args.n_agents)
 
     def pq_forward(self, batch_size, device, test_mode=False):
@@ -80,7 +81,7 @@ class BasicPQMAC(BasicMAC):
     def _build_pq_inputs(self, batch_size, device):
         bs = batch_size
         p_inputs = [th.eye(self.n_agents, device=device).unsqueeze(0).expand(bs, -1, -1)]
-        p_inputs = th.cat([x.reshape(bs*self.n_agents, -1) for x in p_inputs], dim=1)
+        p_inputs = th.cat([x.reshape(bs * self.n_agents, -1) for x in p_inputs], dim=1)
         q_inputs = [th.eye(self.n_agents, device=device).unsqueeze(0).expand(bs, -1, -1)]
         q_inputs = th.cat([x.reshape(bs * self.n_agents, -1) for x in q_inputs], dim=1)
         return p_inputs, q_inputs
@@ -94,12 +95,12 @@ class BasicPQMAC(BasicMAC):
             if t == 0:
                 inputs.append(th.zeros_like(batch["actions_onehot"][:, t]))
             else:
-                inputs.append(batch["actions_onehot"][:, t-1])
+                inputs.append(batch["actions_onehot"][:, t - 1])
         if self.args.obs_agent_id:
             inputs.append(th.eye(self.n_agents, device=batch.device).unsqueeze(0).expand(bs, -1, -1))
         inputs.append(batch["q"][:, t - 1].reshape(bs, -1).unsqueeze(1).expand(-1, self.n_agents, -1))
         inputs.append(batch["p"][:, t - 1].reshape(bs, -1).unsqueeze(1).expand(-1, self.n_agents, -1))
-        inputs = th.cat([x.reshape(bs*self.n_agents, -1) for x in inputs], dim=1)
+        inputs = th.cat([x.reshape(bs * self.n_agents, -1) for x in inputs], dim=1)
         return inputs
 
     def _one_hot_embedding(self, labels, num_classes):
@@ -114,5 +115,3 @@ class BasicPQMAC(BasicMAC):
         """
         y = torch.eye(num_classes)
         return y[labels]
-
-
