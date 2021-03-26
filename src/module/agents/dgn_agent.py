@@ -54,7 +54,8 @@ class DGNAgent(nn.Module):
     def __init__(self, args, scheme):
         super(DGNAgent, self).__init__()
         self.args = args
-        self.encoder = Encoder(scheme["obs"]["vshape"], args.hidden_dim)
+        input_shape = self._get_input_shape(scheme)
+        self.encoder = Encoder(input_shape, args.hidden_dim)
         self.att_1 = AttModel(args.n_agents, args.hidden_dim, args.hidden_dim, args.hidden_dim)
         self.att_2 = AttModel(args.n_agents, args.hidden_dim, args.hidden_dim, args.hidden_dim)
         self.q_net = Q_Net(args.hidden_dim, args.n_actions)
@@ -66,4 +67,14 @@ class DGNAgent(nn.Module):
         h3 = self.att_2(h2, mask)
         q = self.q_net(h3)
         return q, []
+
+    def _get_input_shape(self, scheme):
+        input_shape = scheme["obs"]["vshape"]
+        if self.args.obs_last_action:
+            input_shape += scheme["actions_onehot"]["vshape"][0]
+        if self.args.obs_agent_id:
+            input_shape += self.n_agents
+        if self.args.type == "pq":
+            input_shape += self.n_agents*self.n_agents*2
+        return input_shape
 

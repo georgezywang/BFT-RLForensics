@@ -1,6 +1,7 @@
 # --- Defaults --- Adapted From ROMA Codebase
 
 # --- pymarl options ---
+meta_type: "normal"
 runner: "episode" # Runs 1 env for an episode
 mac: "shared" # Basic controller
 env: "surviving" # Environment name
