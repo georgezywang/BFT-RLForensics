@@ -2,7 +2,7 @@ import torch
 import torch as th
 
 from components.action_selectors import EpsilonGreedyActionSelector
-from controller import BasicMAC
+from controller.shared_controller import BasicMAC
 from module.agents import REGISTRY as agent_REGISTRY
 
 
