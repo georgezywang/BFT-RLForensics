@@ -105,6 +105,7 @@ class EpisodeBatch:
 
             print("crash: k {}, v{}".format(k, v))
             dtype = self.scheme[k].get("dtype", th.float32)
+            print(type(v))
             if not isinstance(v, th.Tensor):
                 v = th.tensor(v, dtype=dtype, device=self.device)
             else:
