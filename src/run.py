@@ -355,6 +355,11 @@ def run_pq_sequential(args, logger):
 
                 learner.action_train(episode_sample, runner.t_env, episode)
 
+            if (runner.t_env - last_log_T) >= args.log_interval:
+                logger.log_stat("episode", episode, runner.t_env)
+                logger.print_recent_stats()
+                last_log_T = runner.t_env
+
         episode_returns = []
         for _ in range(args.pq_sample_runs):
             episode_returns.append(runner.run(p, q, test_mode=True, sample_mode=True))
