@@ -7,9 +7,9 @@ pq_output_type: "pi_logits"
 learner: "pq_q_learner"
 runner: "pq_episode"
 mac: "shared_pq"
-env_steps_every_pq: 1000
-max_pq_training_steps: 10000
-pq_sample_runs: 20
+env_steps_every_pq: 20000
+max_pq_training_steps: 1000
+pq_sample_runs: 5
 
 epsilon_start: 1.0
 epsilon_finish: 0.05
