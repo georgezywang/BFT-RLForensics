@@ -65,16 +65,16 @@ class PQEpisodeRunner:
                     "avail_actions": [self.env.get_avail_actions()],
                     "obs": [self.env.get_obs()],
                     "adjacent_agents": [self.env.get_adj()],
-                    "p": [p],
-                    "q": [q],
+                    "p": p,
+                    "q": q,
                 }
             else:
                 pre_transition_data = {
                     "state": [self.env.get_state()],
                     "avail_actions": [self.env.get_avail_actions()],
                     "obs": [self.env.get_obs()],
-                    "p": [p],
-                    "q": [q],
+                    "p": p,
+                    "q": q,
                 }
 
             self.batch.update(pre_transition_data, ts=self.t)
@@ -108,16 +108,16 @@ class PQEpisodeRunner:
                 "avail_actions": [self.env.get_avail_actions()],
                 "obs": [self.env.get_obs()],
                 "adjacent_agents": [self.env.get_adj()],
-                "p": [p],
-                "q": [q],
+                "p": p,
+                "q": q,
             }
         else:
             last_data = {
                 "state": [self.env.get_state()],
                 "avail_actions": [self.env.get_avail_actions()],
                 "obs": [self.env.get_obs()],
-                "p": [p],
-                "q": [q],
+                "p": p,
+                "q": q,
             }
         self.batch.update(last_data, ts=self.t)
 
