@@ -32,17 +32,12 @@ class DistCritic(nn.Module):
         )
 
     def forward(self, batch, device):
-        bs = batch["z_p"].shape[0]
         inputs = self._build_inputs(batch, device)
-        print("bs in critic: {}".format(bs))
-        print("batch_size in critic: {}".format(batch["z_p"].shape[0]))
-        print("inputs: {}".format(input()))
-        return self.critic(inputs).reshape(bs)
+        return self.critic(inputs)
 
     def _build_inputs(self, batch, device):
         # assume latent_state: [bs, latent_state_size]
         # obs: [bs, seq_len, n_agents, obs_size]
-        bs = batch["z_q"].shape[0]
         inputs = []
 
         z_p_s = batch["z_p"]  # [bs, n_agents, space_dim]
@@ -54,7 +49,7 @@ class DistCritic(nn.Module):
         # agent_id = torch.eye(self.n_agents, device=device).unsqueeze(0).expand(bs, -1, -1)
         # inputs.append(agent_id)
 
-        inputs = torch.cat([x.reshape(bs, -1) for x in inputs], dim=-1)
+        inputs = torch.cat([x.reshape(-1) for x in inputs], dim=-1)
         return inputs
 
     def _get_input_shape(self):

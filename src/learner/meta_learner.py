@@ -34,15 +34,11 @@ class MetaQLearner:
         return z_vals / self.args.n_agents
 
     def z_train(self, batch, device, t_env):  # FIXME: consider value decomposition?
-        bs = batch["evals"].shape[0]
-        print(bs)
-
+        # welp, it isn't batched
         z_vals = self.z_critic(batch, device)
-        print(z_vals)
-        z_targets = torch.sum(batch["evals"], dim=-1)
-        print(z_targets)
+        z_targets = torch.sum(batch["evals"], dim=-1)  # from all agents'
         z_critic_loss = z_vals - z_targets
-        z_critic_loss = (z_critic_loss ** 2).sum()/bs
+        z_critic_loss = (z_critic_loss ** 2).sum()
         self.logger.log_stat("z_critic_loss", z_critic_loss.item(), t_env)
 
         self.z_learning_optimiser.zero_grad()
