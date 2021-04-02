@@ -31,7 +31,10 @@ class BasicLatentMAC:
     def sample_batch_latent_var(self, batch, t):
         # z_q, z_p: [n_agents][latent_relation_space_dim]
         inputs = self._build_latent_encoder_input(batch, t)
-        return self.latent_encoder.infer_posterior(inputs)
+        latent_var = self.latent_encoder.infer_posterior(inputs)
+        if len(latent_var.shape) == 1:
+            latent_var = latent_var.unsqueeze(0)
+        return latent_var
 
     # def sample_latent_var(self, z_q, z_p):
     #     inputs = th.cat([x.reshape(-1) for x in [z_q, z_p]], dim=1)
@@ -112,8 +115,7 @@ class BasicLatentMAC:
                 inputs.append(batch["actions_onehot"][:, t-1])
         if self.args.obs_agent_id:
             inputs.append(th.eye(self.n_agents, device=batch.device).unsqueeze(0).expand(bs, -1, -1))
-        inputs.append(self.sample_batch_latent_var(batch, t))
-        print(inputs)
+        inputs.append(self.sample_batch_latent_var(batch, t).unsqueeze(1).expand(-1, self.n_agents, -1))
         inputs = th.cat([x.reshape(bs*self.n_agents, -1) for x in inputs], dim=1)
         return inputs
 
@@ -127,7 +129,10 @@ class BasicLatentMAC:
     def _build_latent_encoder_input(self, batch, t):
         # z_q, z_p: [n_agents][latent_relation_space_dim]
         bs = batch.batch_size
-        inputs = [batch["z_q"][:, t], batch["z_p"][:, t]]
+        if len(batch["z_q"][:, t].shape) == 1:  # FIXME: probably unnecessary
+            inputs = [batch["z_q"][:, t].unsqueeze(0), batch["z_p"][:, t].unsqueeze(0)]
+        else:
+            inputs = [batch["z_q"][:, t], batch["z_p"][:, t]]
         return th.cat([x.reshape(bs, -1) for x in inputs], dim=1)
 
 
