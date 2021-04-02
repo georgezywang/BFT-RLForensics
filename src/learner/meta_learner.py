@@ -63,7 +63,7 @@ class MetaQLearner:
             kl_divs.append(self.mac.compute_kl_div())
             mac_out.append(agent_outs)  # [t,(bs,n,n_actions)]
         mac_out = th.stack(mac_out, dim=1)  # Concat over time
-        kl_divs = th.stack(kl_divs, dim=1)
+        kl_divs = th.stack(kl_divs, dim=1)[:, :-1]
         # (bs,t,n,n_actions), Q values of n_actions
 
         # Pick the Q-Values for the actions taken by each agent
