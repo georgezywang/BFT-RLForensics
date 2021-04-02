@@ -33,7 +33,7 @@ class MetaQLearner:
         z_vals = self.z_critic(batch, device)
         return z_vals / self.args.n_agents
 
-    def z_train(self, batch, device, t_env):
+    def z_train(self, batch, device, t_env):  # FIXME: consider value decomposition?
         bs = batch["evals"].shape[0]
 
         z_vals = self.z_critic(batch, device)

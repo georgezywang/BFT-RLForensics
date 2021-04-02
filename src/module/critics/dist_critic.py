@@ -35,7 +35,7 @@ class DistCritic(nn.Module):
         inputs = self._build_inputs(batch, device)
         bs = batch["z_p"].shape[0]
         # print("sc control critic actual input:{}".format(inputs.shape))
-        return self.critic(inputs).reshape(bs, self.n_agents)
+        return self.critic(inputs).reshape(bs)
 
     def _build_inputs(self, batch, device):
         # assume latent_state: [bs, latent_state_size]
