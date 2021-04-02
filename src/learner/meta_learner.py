@@ -31,7 +31,7 @@ class MetaQLearner:
 
     def get_social_welfare_z(self, batch, device):
         z_vals = self.z_critic(batch, device)
-        return z_vals / self.args.n_agents
+        return z_vals
 
     def z_train(self, batch, device, t_env):  # FIXME: consider value decomposition?
         # welp, it isn't batched

@@ -245,7 +245,6 @@ def run_distance_sequential(args, logger):
         episode_returns = []
         for _ in range(args.z_sample_runs):
             episode_returns.append(runner.run(z_q, z_p, test_mode=True, sample_mode=True))
-        episode_returns = torch.sum(episode_returns, dim=0)
         data = {"z_p": z_p, "z_q": z_q, "evals": episode_returns}
         train_batch = {}
         for k, v in data.items():
