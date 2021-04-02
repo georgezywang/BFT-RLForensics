@@ -96,6 +96,7 @@ class DistEpisodeRunner:
             # calculate distance
             dist = []
             for giver in range(self.n_agents):  # FIXME: seriously, refactor this
+                print(z_q.shape)
                 if len(z_q.shape) == 2:
                     z_q_giver = z_q[0][giver]
                 else:
