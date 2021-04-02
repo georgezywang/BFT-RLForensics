@@ -165,7 +165,7 @@ class DistEpisodeRunner:
 
 
     def _log(self, returns, dis_returns, stats, prefix):
-        self.logger.console_logger.info("Agent rewards:")
+        # self.logger.console_logger.info("Agent rewards:")
         for agent_idx in range(self.n_agents):
             agent_returns = [dis_returns[t][agent_idx] for t in range(len(dis_returns))]
             self.logger.log_stat(prefix + "agent {} post-sharing return_mean".format(agent_idx), np.mean(agent_returns), self.t_env)
