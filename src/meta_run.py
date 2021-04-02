@@ -304,8 +304,8 @@ def run_distance_sequential(args, logger):
 def generate_dist_distributions(args, num=None):
     # [(z_q, z_p)]: z_q: [n_agents][space_dim]
     # FIXME: any better (more spreading) way than uniform?
-    distribution = torch.distributions.uniform.Uniform(torch.Tensor([args.latent_relation_space_lower_bound]),
-                                                       torch.Tensor([args.latent_relation_space_upper_bound]))
+    distribution = torch.distributions.uniform.Uniform(torch.tensor([args.latent_relation_space_lower_bound], dtype=torch.float),
+                                                       torch.tensor([args.latent_relation_space_upper_bound], dtype=torch.float))
 
     if num is None:
         tasks = [(distribution.sample(torch.Size([args.n_agents, args.latent_relation_space_dim])).view(1, args.n_agents, args.latent_relation_space_dim),
