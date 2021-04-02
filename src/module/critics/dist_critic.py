@@ -34,7 +34,8 @@ class DistCritic(nn.Module):
     def forward(self, batch, device):
         inputs = self._build_inputs(batch, device)
         bs = batch["z_p"].shape[0]
-        # print("sc control critic actual input:{}".format(inputs.shape))
+        print("bs in critic: {}".format(bs))
+        print("inputs: {}".format(input()))
         return self.critic(inputs).reshape(bs)
 
     def _build_inputs(self, batch, device):
