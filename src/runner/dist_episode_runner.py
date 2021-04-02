@@ -95,8 +95,13 @@ class DistEpisodeRunner:
             distributed_rewards = [0] * self.n_agents
             # calculate distance
             dist = []
-            for giver in range(self.n_agents):
-                dist.append(softmax([0.0-distance(z_q[0][giver], z_p[0][receiver]) for receiver in range(self.n_agents)]))
+            for giver in range(self.n_agents):  # FIXME: seriously, refactor this
+                if len(z_q.shape) == 2:
+                    z_q_giver = z_q[0][giver]
+                else:
+                    z_q_giver = z_q[giver]
+                dist.append(softmax([0.0-distance(z_q_giver, z_p[receiver] if len(z_p.shape) == 1 else z_p[0][receiver])
+                                     for receiver in range(self.n_agents)]))
 
             for receiver in range(self.n_agents):
                 for giver in range(self.n_agents):
