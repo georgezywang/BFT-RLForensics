@@ -49,11 +49,11 @@ class DistCritic(nn.Module):
         inputs.append(z_p_s)
 
         # agent_id
-        agent_id = torch.eye(self.n_agents, device=device).unsqueeze(0).expand(bs, -1, -1)
-        inputs.append(agent_id)
+        # agent_id = torch.eye(self.n_agents, device=device).unsqueeze(0).expand(bs, -1, -1)
+        # inputs.append(agent_id)
 
-        inputs = torch.cat([x.reshape(bs*self.n_agents, -1) for x in inputs], dim=-1)
+        inputs = torch.cat([x.reshape(bs, -1) for x in inputs], dim=-1)
         return inputs
 
     def _get_input_shape(self):
-        return self.n_agents * self.args.latent_relation_space_dim + self.n_agents # z_q, z_q, agent_id
+        return self.args.latent_relation_space_dim * 2  # z_q, z_q

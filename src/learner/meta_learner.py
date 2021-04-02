@@ -1,4 +1,7 @@
 import copy
+
+import torch
+
 from components.episode_buffer import EpisodeBatch
 import torch as th
 from torch.optim import Adam
@@ -28,13 +31,13 @@ class MetaQLearner:
 
     def get_social_welfare_z(self, batch, device):
         z_vals = self.z_critic(batch, device)
-        return z_vals.sum() / self.args.n_agents
+        return z_vals / self.args.n_agents
 
     def z_train(self, batch, device, t_env):
         bs = batch["evals"].shape[0]
 
         z_vals = self.z_critic(batch, device)
-        z_targets = batch["evals"]
+        z_targets = torch.sum(batch["evals"], dim=-1)
         z_critic_loss = z_vals - z_targets
         z_critic_loss = (z_critic_loss ** 2).sum()/bs
         self.logger.log_stat("z_critic_loss", z_critic_loss.item(), t_env)

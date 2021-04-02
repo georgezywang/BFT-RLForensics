@@ -207,7 +207,7 @@ def run_distance_sequential(args, logger):
                 logger.print_recent_stats()
                 last_log_T = runner.t_env
 
-    logger.console_logger.info("Beginning training for {} timesteps".format(args.meta_t_max))
+    logger.console_logger.info("Beginning training for {} timesteps".format(args.total_z_training_steps*args.env_steps_every_z))
     runner.t_env = 0
     z_train_cnt = 0
     env_steps_per_z = 0
