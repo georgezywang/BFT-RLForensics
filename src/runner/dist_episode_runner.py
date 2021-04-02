@@ -190,6 +190,5 @@ def softmax(vector):
     return [x / sum(e) for x in e]
 
 def distance(a, b):
-    print(a-b)
     ret = numpy.linalg.norm([a-b], ord=2)
     return ret
