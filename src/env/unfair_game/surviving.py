@@ -173,7 +173,7 @@ class Surviving(MultiAgentEnv):
 
             self.foods[i] = max(0, min(self.foods[i] - 1, self.max_food))
 
-        reward = [5 + 0.4] * self.n_agent
+        reward = [0.4] * self.n_agent
         for i in range(self.n_agent):
             if self.foods[i] == 0:
                 reward[i] = - 0.2
