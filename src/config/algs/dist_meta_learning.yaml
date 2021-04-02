@@ -2,7 +2,7 @@ critic_hidden_sizes: [64]
 learner: "meta_learner"
 runner: "dist_episode"
 mac: "latent_dist"
-total_z_training_steps: 10000
+total_z_training_steps: 1000
 env_steps_every_z: 2000 # 50000
 z_sample_runs: 10
 
@@ -21,7 +21,7 @@ latent_relation_space_lower_bound: 10.0
 latent_var_dim: 8
 latent_encoder_hidden_sizes: [32, 32]
 pretrained_task_num: 20
-total_pretrain_steps: 2000 # 500000
+total_pretrain_steps: 100000
 z_critic_lr: 0.001
 z_update_lr: 0.001
 
