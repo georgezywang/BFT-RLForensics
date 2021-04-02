@@ -76,5 +76,7 @@ class DGNAgent(nn.Module):
             input_shape += self.n_agents
         if self.args.meta_type == "pq":
             input_shape += self.args.n_agents*self.args.n_agents*2
+        if self.args.meta_type == "distance_latent":
+            input_shape += self.args.latent_var_dim
         return input_shape
 
