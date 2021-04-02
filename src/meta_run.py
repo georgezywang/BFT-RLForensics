@@ -258,7 +258,7 @@ def run_distance_sequential(args, logger):
         learner.z_train(train_batch, device, z_train_cnt)
 
         # update z_q, z_p
-        total_val = learner.get_social_welfare_z()
+        total_val = learner.get_social_welfare_z(train_batch, device)
         z_optimiser.zero_grad()
         total_val.backward()
         z_optimiser.step()
