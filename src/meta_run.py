@@ -209,6 +209,7 @@ def run_distance_sequential(args, logger):
 
     logger.console_logger.info("Beginning training for {} timesteps".format(args.total_z_training_steps*args.env_steps_every_z))
     runner.t_env = 0
+    last_log_T = 0
     z_train_cnt = 0
     env_steps_per_z = 0
     z_p, z_q = generate_dist_distributions(args, num=1)
