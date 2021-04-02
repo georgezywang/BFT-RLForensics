@@ -90,14 +90,13 @@ class DistEpisodeRunner:
             # Pass the entire batch of experiences up till now to the agents
             # Receive the actions for each agent at this timestep in a batch of size 1
             actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
-            # pq: [1, agent_num, control_dim]
 
             rewards, terminated, env_info = self.env.step(actions[0])
             distributed_rewards = [0] * self.n_agents
             # calculate distance
             dist = []
             for giver in range(self.n_agents):
-                dist.append(softmax([0.0-distance(z_q[giver], z_p[receiver]) for receiver in range(self.n_agents)]))
+                dist.append(softmax([0.0-distance(z_q[0][giver], z_p[0][receiver]) for receiver in range(self.n_agents)]))
 
             for receiver in range(self.n_agents):
                 for giver in range(self.n_agents):

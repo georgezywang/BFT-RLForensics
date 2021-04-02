@@ -308,12 +308,12 @@ def generate_dist_distributions(args, num=None):
                                                        torch.Tensor([args.latent_relation_space_upper_bound]))
 
     if num is None:
-       tasks = [(distribution.sample(torch.Size([args.n_agents, args.latent_relation_space_dim])),
-                 distribution.sample(torch.Size([args.n_agents, args.latent_relation_space_dim])))
-                for _ in range(args.pretrained_task_num)]
+        tasks = [(distribution.sample(torch.Size([args.n_agents, args.latent_relation_space_dim])).view(1, args.n_agents, args.latent_relation_space_dim),
+                  distribution.sample(torch.Size([args.n_agents, args.latent_relation_space_dim])).view(1, args.n_agents, args.latent_relation_space_dim))
+                 for _ in range(args.pretrained_task_num)]
     else:
-        tasks = (distribution.sample(torch.Size([args.n_agents, args.latent_relation_space_dim])),
-                 distribution.sample(torch.Size([args.n_agents, args.latent_relation_space_dim])))
+        tasks = (distribution.sample(torch.Size([args.n_agents, args.latent_relation_space_dim])).view(args.n_agents, args.latent_relation_space_dim),
+                 distribution.sample(torch.Size([args.n_agents, args.latent_relation_space_dim])).view(args.n_agents, args.latent_relation_space_dim))
         tasks[0].requires_grad = True
         tasks[1].requires_grad = True
     return tasks
