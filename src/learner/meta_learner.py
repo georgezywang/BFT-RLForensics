@@ -97,8 +97,12 @@ class MetaQLearner:
         td_error = (chosen_action_qvals - targets.detach())  # no gradient through target net
         # (bs,t,1)
 
+        print("in learner:")
+        print(kl_divs)
         kl_mask = copy.deepcopy(mask).expand_as(kl_divs)
+        print(kl_mask)
         masked_kl_div = kl_divs * kl_mask
+        print(masked_kl_div)
         kl_div_loss = (masked_kl_div ** 2).sum() / kl_mask.sum()
 
         mask = mask.expand_as(td_error)
