@@ -67,7 +67,7 @@ class MLPMultiGaussianEncoder(nn.Module):
         posteriors = [torch.distributions.Normal(mu, torch.sqrt(var)) for mu, var in
                       zip(torch.unbind(self.z_means), torch.unbind(self.z_vars))]
         kl_divs = [torch.distributions.kl.kl_divergence(post, prior) for post in posteriors]
-        print(kl_divs)
+        #print(kl_divs)
         kl_divs = torch.stack(kl_divs)
         return kl_divs
         #kl_div_sum = torch.sum(torch.stack(kl_divs))
