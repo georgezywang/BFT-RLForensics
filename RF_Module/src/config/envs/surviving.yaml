@@ -1,0 +1,4 @@
+n_agents: 3
+max_food: 15
+n_resource: 10
+episode_limit: 50

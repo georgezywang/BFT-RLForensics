@@ -1,0 +1,35 @@
+critic_hidden_sizes: [64]
+learner: "meta_learner"
+runner: "dist_episode"
+mac: "latent_dist"
+total_z_training_steps: 1000
+env_steps_every_z: 2000 # 50000
+z_sample_runs: 10
+
+epsilon_start: 1.0
+epsilon_finish: 0.05
+epsilon_anneal_time: 50000
+
+buffer_size: 5000
+
+#
+meta_t_max:
+meta_type: "distance_latent"
+latent_relation_space_dim: 4
+latent_relation_space_upper_bound: 0.0
+latent_relation_space_lower_bound: 10.0
+latent_var_dim: 8
+latent_encoder_hidden_sizes: [32, 32]
+pretrained_task_num: 20
+total_pretrain_steps: 100000
+z_critic_lr: 0.001
+z_update_lr: 0.001
+
+
+# update the target network every {} episodes
+target_update_interval: 200
+
+# use the Q_Learner to train
+agent_output_type: "q"
+
+name: "pq_dgn_q_learning"
