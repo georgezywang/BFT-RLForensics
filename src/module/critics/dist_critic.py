@@ -32,9 +32,10 @@ class DistCritic(nn.Module):
         )
 
     def forward(self, batch, device):
-        inputs = self._build_inputs(batch, device)
         bs = batch["z_p"].shape[0]
+        inputs = self._build_inputs(batch, device)
         print("bs in critic: {}".format(bs))
+        print("batch_size in critic: {}".format(batch["z_p"].shape[0]))
         print("inputs: {}".format(input()))
         return self.critic(inputs).reshape(bs)
 
@@ -57,4 +58,4 @@ class DistCritic(nn.Module):
         return inputs
 
     def _get_input_shape(self):
-        return self.args.latent_relation_space_dim * 2  # z_q, z_q
+        return self.n_agents*self.args.latent_relation_space_dim * 2  # z_q, z_q
