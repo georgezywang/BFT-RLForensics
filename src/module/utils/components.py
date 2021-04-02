@@ -117,8 +117,8 @@ class MLP(nn.Module):
                 self.layer_norms.append(ln)
 
         self.last_fc = nn.Linear(in_size, output_size)
-        # self.last_fc.weight.data.uniform_(-init_w, init_w)
-        # self.last_fc.bias.data.uniform_(-init_w, init_w)
+        self.last_fc.weight.data.uniform_(-init_w, init_w)
+        self.last_fc.bias.data.uniform_(-init_w, init_w)
 
     def forward(self, input, return_preactivation=False):
         h = input
