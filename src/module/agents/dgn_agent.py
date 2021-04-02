@@ -73,7 +73,7 @@ class DGNAgent(nn.Module):
         if self.args.obs_last_action:
             input_shape += scheme["actions_onehot"]["vshape"][0]
         if self.args.obs_agent_id:
-            input_shape += self.n_agents
+            input_shape += self.args.n_agents
         if self.args.meta_type == "pq":
             input_shape += self.args.n_agents*self.args.n_agents*2
         if self.args.meta_type == "distance_latent":
