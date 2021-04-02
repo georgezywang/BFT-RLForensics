@@ -181,7 +181,7 @@ def run_distance_sequential(args, logger):
     start_time = time.time()
     last_time = start_time
 
-    logger.console_logger.info("Beginning meta-training for {} timesteps".format(args.meta_t_max))
+    logger.console_logger.info("Beginning meta-training for {} timesteps".format(args.total_pretrain_steps))
 
     tasks = generate_dist_distributions(args)
     while runner.t_env <= args.total_pretrain_steps:
@@ -211,7 +211,7 @@ def run_distance_sequential(args, logger):
     runner.t_env = 0
     z_train_cnt = 0
     env_steps_per_z = 0
-    z_p, z_q = generate_dist_distributions(args, num=1)[0]
+    z_p, z_q = generate_dist_distributions(args, num=1)
     z_optimiser = torch.optim.Adam(params=[z_p, z_q], lr=args.z_update_lr, eps=args.optim_eps)
     while z_train_cnt <= args.total_z_training_steps:
         device = "cpu" if args.buffer_cpu_only else args.device
