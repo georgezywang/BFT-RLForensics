@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/reward-sharing-nash-q.iml" filepath="$PROJECT_DIR$/.idea/reward-sharing-nash-q.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/BFT-RFForensics.iml" filepath="$PROJECT_DIR$/.idea/BFT-RFForensics.iml" />
     </modules>
   </component>
 </project>
