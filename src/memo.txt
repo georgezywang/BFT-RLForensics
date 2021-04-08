@@ -1,0 +1,6 @@
+Env: Simulator PBFT-PK:
+Assumptions that attacker player cannot break cryptographic scheme:
+- msg from known peer sender(s)
+- claimed sender is the actual sender
+- msg content must be legitimate
+Therefore, no msg would be valid, and all should be processed

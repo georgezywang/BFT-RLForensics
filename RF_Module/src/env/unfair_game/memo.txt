@@ -1,6 +1,0 @@
-On the design of task environments:
-
-- consistent reward exchange helps the agent solve task
-    - equally true in single agent task:
-        - rewards signals: only reflect the current state and provided with the reward signal of the current state,
-        the agent is more likely to receive high reward in the next state
