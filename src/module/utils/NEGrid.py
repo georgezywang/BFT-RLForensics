@@ -1,5 +1,5 @@
 """
-code adapted from: https://github.com/david138/Nash-Equilibrium/blob/master/src/nash_grid.py
+code modified from: https://github.com/david138/Nash-Equilibrium/blob/master/src/nash_grid.py
 """
 
 import numpy as np
@@ -9,23 +9,18 @@ P2 = 1
 min_inf = -1e10
 
 
-class NashGrid:
-    def generate_payout_grid(self, file):
-        payout_grid = []
-        for line in file:
-            row_array = []
-            for payouts in line.split(" "):
-                row_array.append([int(payout) for payout in payouts.split(",")])
-            payout_grid.append(row_array)
-        return payout_grid
+def _generate_labels(labels_num):
+    return list(range(labels_num))
 
-    def get_pure_NE(self, grid):
+
+class NashGrid:
+    def get_max_equilibrium_payoffs(self, grid):
         """
         [[,], [,]], [[,], [,]]
         """
         self.payout_grid = grid
-        self.row_labels = self._generate_labels(len(self.payout_grid))
-        self.col_labels = self._generate_labels(len(self.payout_grid[0]))
+        self.row_labels = _generate_labels(len(self.payout_grid))
+        self.col_labels = _generate_labels(len(self.payout_grid[0]))
         pure_p1_payoff, pure_p2_payoff, pure_found = self._get_pure_strategy_payoffs()
         mixed_p1_payoff, mixed_p2_payoff = self._get_mixed_strategy_payoffs()
         p1_payoff, p2_payoff = mixed_p1_payoff, mixed_p2_payoff
@@ -33,9 +28,6 @@ class NashGrid:
             p1_payoff = pure_p1_payoff
             p2_payoff = pure_p2_payoff
         return p1_payoff, p2_payoff
-
-    def _generate_labels(self, labels_num):
-        return list(range(labels_num))
 
     def _remove_strictly_dominated_moves(self):
         while self._remove_strictly_dominated_p1() | self._remove_strictly_dominated_p2():
