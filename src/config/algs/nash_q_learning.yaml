@@ -3,13 +3,14 @@ epsilon_finish: 0.05
 epsilon_anneal_time: 50000
 
 buffer_size: 5000
-control_dim: 2
+
 # update the target network every {} episodes
 target_update_interval: 200
 
-power_structure_freeze_steps: 5
 
 # use the Q_Learner to train
+attacker:
+identifier:
 agent_output_type: "q"
 
 control_estimator_hidden_sizes: [32,]

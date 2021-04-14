@@ -1,0 +1,8 @@
+#general
+n_peers:
+f:
+
+#initialization
+initialized_seq_num: 0
+initialized_view_num: 0
+initialized_primary: 0

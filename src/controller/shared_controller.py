@@ -10,95 +10,99 @@ class BasicMAC:
         self.n_agents = args.n_agents
         self.args = args
         self.scheme = scheme
-        input_shape = self._get_input_shape(scheme)
         self._build_agents()
-        self.agent_output_type = args.agent_output_type
-        self.action_selector = EpsilonGreedyActionSelector(args)
+        self.attacker_action_selector = EpsilonGreedyActionSelector(args)
+        self.identifier_action_selector = EpsilonGreedyActionSelector(args)
 
-        self.hidden_states = None
+        self.attacker_hidden_states = None
+        self.identifier_hidden_states = None
 
     def select_actions(self, ep_batch, t_ep, t_env, bs=slice(None), test_mode=False):
         # Only select actions for the selected batch elements in bs
-        avail_actions = ep_batch["avail_actions"][:, t_ep]
-        agent_outputs = self.forward(ep_batch, t_ep, test_mode=test_mode)
-        chosen_actions = self.action_selector.select_action(agent_outputs[bs], avail_actions[bs], t_env, test_mode=test_mode)
-        return chosen_actions
+        attacker_avail_actions = ep_batch["attacker_avail_actions"][:, t]
+        identifier_avail_actions = ep_batch["identifier_avail_actions"][:, t]
+        attacker_outputs, identifier_outputs = self.forward(ep_batch, t_ep)
+        attacker_chosen_actions = self.attacker_action_selector.select_action(attacker_outputs[bs], attacker_avail_actions[bs], t_env, test_mode=test_mode)
+        identifier_chosen_actions = self.identifier_action_selector.select_action(identifier_outputs[bs], identifier_avail_actions[bs], t_env, test_mode=test_mode)
+        return attacker_chosen_actions, identifier_chosen_actions
 
-    def forward(self, ep_batch, t, test_mode=False):
-        agent_inputs = self._build_inputs(ep_batch, t)
-        avail_actions = ep_batch["avail_actions"][:, t]
-        mask = ep_batch["adjacent_agents"][:, t]
-        agent_outs, self.hidden_states = self.agent(agent_inputs, mask, self.hidden_states)
+    def forward(self, ep_batch, t):
+        attacker_input, identifier_input = self._build_inputs(ep_batch, t)
+        attacker_outs, self.attacker_hidden_states = self.attacker(attacker_input, self.attacker_hidden_states)
+        identifier_outs, self.identifier_hidden_states = self.identifier(identifier_input, self.identifier_hidden_states)
+        return attacker_outs.view(ep_batch.batch_size, -1), identifier_outs.view(ep_batch.batch_size, -1)
 
-        # Softmax the agent outputs if they're policy logits
-        if self.agent_output_type == "pi_logits":  # (0, 1) -> (-inf, inf)
+    def compute_equilibrium_payoffs(self, ep_batch, t):
 
-            if getattr(self.args, "mask_before_softmax", True):
-                # Make the logits for unavailable actions very negative to minimise their affect on the softmax
-                reshaped_avail_actions = avail_actions.reshape(ep_batch.batch_size * self.n_agents, -1)
-                agent_outs[reshaped_avail_actions == 0] = -1e10
-
-            agent_outs = th.nn.functional.softmax(agent_outs, dim=-1)
-            if not test_mode:
-                # Epsilon floor
-                epsilon_action_num = agent_outs.size(-1)
-                if getattr(self.args, "mask_before_softmax", True):
-                    # With probability epsilon, we will pick an available action uniformly
-                    epsilon_action_num = reshaped_avail_actions.sum(dim=1, keepdim=True).float()
-
-                agent_outs = ((1 - self.action_selector.epsilon) * agent_outs
-                               + th.ones_like(agent_outs) * self.action_selector.epsilon/epsilon_action_num)
-
-                if getattr(self.args, "mask_before_softmax", True):
-                    # Zero out the unavailable actions
-                    agent_outs[reshaped_avail_actions == 0] = 0.0
-
-        return agent_outs.view(ep_batch.batch_size, self.n_agents, -1)
 
     def init_hidden(self, batch_size):
-        if 'init_hidden' in self.agent.__dict__:
-            self.hidden_states = self.agent.init_hidden().unsqueeze(0).expand(batch_size, self.n_agents, -1)  # bav
+        if 'init_hidden' in self.attacker.__dict__:
+            self.attacker_hidden_states = self.attacker.init_hidden().unsqueeze(0).expand(batch_size, -1)  # bav
+        if 'init_hidden' in self.identifier.__dict__:
+            self.identifier_hidden_states = self.identifier.init_hidden().unsqueeze(0).expand(batch_size, -1)
 
     def parameters(self):
-        return self.agent.parameters()
+        return list(self.attacker.parameters())+list(self.identifier.parameters())
 
     def load_state(self, other_mac):
-        self.agent.load_state_dict(other_mac.agent.state_dict())
+        self.attacker.load_state_dict(other_mac.attacker.state_dict())
+        self.identifier.load_state_dict(other_mac.identifier.state_dict())
 
     def cuda(self):
-        self.agent.cuda()
+        self.attacker.cuda()
+        self.identifier.cuda()
 
     def save_models(self, path):
-        th.save(self.agent.state_dict(), "{}/agent.th".format(path))
+        th.save(self.attacker.state_dict(), "{}/attacker.th".format(path))
+        th.save(self.identifier.state_dict(), "{}/identifier.th".format(path))
 
     def load_models(self, path):
-        self.agent.load_state_dict(th.load("{}/agent.th".format(path), map_location=lambda storage, loc: storage))
+        self.attacker.load_state_dict(th.load("{}/attacker.th".format(path), map_location=lambda storage, loc: storage))
+        self.identifier.load_state_dict(th.load("{}/identifier.th".format(path), map_location=lambda storage, loc: storage))
 
     def _build_agents(self):
-        self.agent = agent_REGISTRY[self.args.agent](self.args, self.scheme)
+        input_shape_attacker, input_shape_identifier = self._get_input_shape(self.scheme)
+        output_shape_attacker, output_shape_identifier = self._get_output_shape(self.scheme)
+        self.attacker = agent_REGISTRY[self.args.agent_attacker](input_shape_attacker, output_shape_attacker, self.args)
+        self.identifier = agent_REGISTRY[self.args.agent_identifier](input_shape_identifier, output_shape_identifier, self.args)
 
     def _build_inputs(self, batch, t):
         # Assumes homogenous agents with flat observations.
         # Other MACs might want to e.g. delegate building inputs to each agent
         bs = batch.batch_size
-        inputs = []
-        inputs.append(batch["obs"][:, t])  # b1av
-        if self.args.obs_last_action:
-            if t == 0:
-                inputs.append(th.zeros_like(batch["actions_onehot"][:, t]))
-            else:
-                inputs.append(batch["actions_onehot"][:, t-1])
-        if self.args.obs_agent_id:
-            inputs.append(th.eye(self.n_agents, device=batch.device).unsqueeze(0).expand(bs, -1, -1))
 
-        inputs = th.cat([x.reshape(bs*self.n_agents, -1) for x in inputs], dim=1)
-        return inputs
+        attacker_inputs = []
+        attacker_inputs.append(batch["attacker_obs"][:, t])  # b1av
+        # observe opponent's last action
+        if t == 0:
+            attacker_inputs.append(th.zeros_like(batch["identifier_actions_onehot"][:, t]))
+        else:
+            attacker_inputs.append(batch["identifier_actions_onehot"][:, t-1])
+        attacker_inputs = th.cat(attacker_inputs, dim=1)
+
+        identifier_inputs = []
+        identifier_inputs.append(batch["identifier_obs"][:, t])  # b1av
+        # observe opponent's last action
+        if t == 0:
+            identifier_inputs.append(th.zeros_like(batch["attacker_actions_onehot"][:, t]))
+        else:
+            identifier_inputs.append(batch["attacker_actions_onehot"][:, t - 1])
+        identifier_inputs = th.cat(identifier_inputs, dim=1)
+
+        return attacker_inputs, identifier_inputs
+
+    def _build_payoff_table_inputs(self, ep_batch, t):
+        # [agents][]
+        bs = ep_batch.batch_size
+        inputs = []
+
 
     def _get_input_shape(self, scheme):
-        input_shape = scheme["obs"]["vshape"]
-        if self.args.obs_last_action:
-            input_shape += scheme["actions_onehot"]["vshape"][0]
-        if self.args.obs_agent_id:
-            input_shape += self.n_agents
+        attacker_input_shape = scheme["attacker_obs"]["vshape"] + scheme["identifier_actions_onehot"]["vshape"][0]
+        identifier_input_shape = scheme["identifier_obs"]["vshape"] + scheme["attacker_actions_onehot"]["vshape"][0]
+        return attacker_input_shape, identifier_input_shape
 
-        return input_shape
+    def _get_output_shape(self, scheme):
+        # self_args:
+        attacker_output_shape = scheme["attacker_actions_onehot"]
+        identifier_output_shape = scheme["identifier_actions_onehot"]

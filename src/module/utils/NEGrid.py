@@ -9,7 +9,7 @@ P2 = 1
 min_inf = -1e10
 
 
-def _generate_labels(labels_num):
+def generate_labels(labels_num):
     return list(range(labels_num))
 
 
@@ -19,8 +19,8 @@ class NashGrid:
         [[,], [,]], [[,], [,]]
         """
         self.payout_grid = grid
-        self.row_labels = _generate_labels(len(self.payout_grid))
-        self.col_labels = _generate_labels(len(self.payout_grid[0]))
+        self.row_labels = generate_labels(len(self.payout_grid))
+        self.col_labels = generate_labels(len(self.payout_grid[0]))
         pure_p1_payoff, pure_p2_payoff, pure_found = self._get_pure_strategy_payoffs()
         mixed_p1_payoff, mixed_p2_payoff = self._get_mixed_strategy_payoffs()
         p1_payoff, p2_payoff = mixed_p1_payoff, mixed_p2_payoff
