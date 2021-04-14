@@ -9,15 +9,14 @@ class PBFTagent():
         self.args = args
         self.id = id
         self.n_peers = args.n_peers
-        self.current_state = None
         self.current_view = 0
         self.current_view_active = False
         self.current_primary = 0
-        self.current_seq_num = 0
         self.primary_last_used_seq_num = 0
         # the last seqnum used to generate a new seq (valid only when the replica is the primary)
         self.last_stable_seq_num = 0
         # the latest stable seqnum known to this replica
+        self.last_executed_seq_num = 0
         self.seq_num_of_last_reply_to_client = -1
         self.mainlog = None
         self.msgs_to_be_send = []
@@ -26,10 +25,10 @@ class PBFTagent():
         self.current_primary = self.args.initialized_primary
         self.current_view = self.args.initialized_view_num
         self.current_view_active = True
-        self.current_seq_num = self.args.innitialized_seq_num
         self.mainlog = Log(self.args)
         self.primary_last_used_seq_num = self.args.initialized_seq_num
-        self.last_stable_seq_num = self.args.initialized_seq_num
+        self.last_stable_seq_num = self.args.initialized_seq_num - 1
+        self.last_executed_seq_num = self.args.initialized_seq_num - 1
         self.seq_num_of_last_reply_to_client = self.args.initialized_seq_num - 1
         self.msgs_to_be_send = []
 
@@ -40,7 +39,7 @@ class PBFTagent():
 
     def on_msg(self, msg):
 
-    def on_client_msg(self, msg):
+    def _on_client_msg(self, msg):
         if not self._current_view_is_active():
             return
         if self.seq_num_of_last_reply_to_client < msg.seq_num:
@@ -57,6 +56,33 @@ class PBFTagent():
             print("ignored, i may be old!")
 
     def _try_to_send_preprepare(self, client_msg):
+        if not self.is_current_primary() or not self._current_view_is_active():
+            return
+        if self.primary_last_used_seq_num + 1 > self.last_stable_seq_num + self.args.work_window_size:
+            print("out of window!")
+            return
+        if self.primary_last_used_seq_num > self.last_executed_seq_num:
+            print("huh, last used seq num > last executed")
+            return
+
+        params = {"msg_type": "PrePrepare",
+                  "view_num": self.current_view,
+                  "seq_num": self.primary_last_used_seq_num+1,
+                  "signer_id": self.id,
+                  "val": client_msg.val}
+        self._create_broadcast_messages(params)
+
+        params["receiver_id"] = self.id
+        self_pp_msg = create_message(self.args, params)
+        self.mainlog.get_entry(self_pp_msg.seq_num).add_message(self_pp_msg)
+        self.primary_last_used_seq_num += 1
+
+    def _create_broadcast_messages(self, params):
+        for r_id in range(self.n_peers):
+            if r_id != self.id:
+                t_params = copy.deepcopy(params)
+                t_params["receiver_id"] = r_id
+                self.msgs_to_be_send.append(create_message(self.args, t_params))
 
     def _on_msg_preprepare(self, msg):
 

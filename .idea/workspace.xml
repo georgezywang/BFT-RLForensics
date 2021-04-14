@@ -2,22 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d609e81d-e11f-41d4-b424-787c505a44d8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/config/envs/pbft.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/protocols/PBFT/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/protocols/PBFT/log.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/protocols/PBFT/message.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/protocols/PBFT/replica.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/protocols/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/agents/protocol_agents/pbft_agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/agents/protocol_agents/pbft_agent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/algs/nash_q_learning.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/algs/nash_q_learning.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controller/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controller/shared_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/controller/shared_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/learner/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/learner/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/learner/nash_q_learner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/learner/nash_q_learner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/module/utils/NEGrid.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/module/utils/NEGrid.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/runner/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/runner/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/envs/pbft.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/envs/pbft.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/protocols/PBFT/log.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/protocols/PBFT/log.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/protocols/PBFT/replica.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/protocols/PBFT/replica.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

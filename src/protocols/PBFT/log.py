@@ -4,10 +4,10 @@ class Log():
         self.entries = {}
 
     def get_entry(self, seq_num):
-        if seq_num in self.entries.keys():
-            return self.entries[seq_num]
-        else:
+        if seq_num not in self.entries.keys():
             self.entries[seq_num] = Entry(self.args, seq_num)
+        return self.entries[seq_num]
+
 
 type_dict = {"PrePrepare": 1,
              "Prepare": 2,

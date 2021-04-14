@@ -6,3 +6,5 @@ f:
 initialized_seq_num: 0
 initialized_view_num: 0
 initialized_primary: 0
+
+work_window_size:
