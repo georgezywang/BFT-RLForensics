@@ -2,6 +2,7 @@
 #node id is 0-indexed
 n_peers:
 f:
+num_malicious:
 
 #initialization
 initialized_seq_num: 0
@@ -9,7 +10,9 @@ initialized_view_num: 0
 initialized_primary: 0
 
 work_window_size:
-idel_timer_limit:
+idle_timer_limit:
 commit_timer_limit:
 view_change_duration:
 simulator_id:
+
+max_message_num_per_round:

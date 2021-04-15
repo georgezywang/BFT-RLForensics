@@ -16,15 +16,14 @@ type_dict = {"PrePrepare": 1,
 
 
 class PBFTagent():
-    def __init__(self, args, id):
+    def __init__(self, args):
         self.args = args
-        self.id = id
+        self.id = 0
         self.n_peers = args.n_peers
         self.current_view = 0
         self.changing_view = 0
         self.state = 0
         self.current_primary = 0
-        self.primary_last_used_seq_num = 0
         # the latest stable seqnum known to this replica
         self.last_committed_seq_num = 0
         self.mainlog = None
@@ -33,12 +32,12 @@ class PBFTagent():
         self.commit_timer = float("inf")
         self.view_change_timer = float("inf")
 
-    def reset(self):
+    def reset(self, replica_id):
+        self.id = replica_id
         self.current_primary = self.args.initialized_primary
         self.current_view = self.args.initialized_view_num
         self.state = state_dict["normal"]
         self.mainlog = Log(self.args)
-        self.primary_last_used_seq_num = self.args.initialized_seq_num
         self.last_committed_seq_num = self.args.initialized_seq_num - 1
         self.msgs_to_be_send = []
         self.changing_view = float("inf")
@@ -98,13 +97,15 @@ class PBFTagent():
     def _try_to_send_preprepare(self, client_msg):
         if not self._is_current_primary() or not self._is_normal_mode():
             return
-        if self.primary_last_used_seq_num + 1 > self.last_committed_seq_num + self.args.work_window_size:
+        if client_msg.seq_num > self.last_committed_seq_num + self.args.work_window_size:
             print("out of window!")
+            return
+        if self.mainlog.get_entry(client_msg.seq_num).is_preprepare_ready():
             return
 
         params = {"msg_type": "PrePrepare",
                   "view_num": self.current_view,
-                  "seq_num": self.primary_last_used_seq_num + 1,
+                  "seq_num": client_msg.seq_num,
                   "signer_id": self.id,
                   "val": client_msg.val}
         self._create_broadcast_messages(params)
@@ -112,8 +113,6 @@ class PBFTagent():
         params["receiver_id"] = self.id
         self_pp_msg = create_message(self.args, params)
         pp_msg_added = self.mainlog.get_entry(self_pp_msg.seq_num).add_message(self_pp_msg)
-
-        self.primary_last_used_seq_num += 1
 
     def _on_msg_preprepare(self, msg):
         if msg.sender_id != self.current_primary:

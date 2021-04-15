@@ -103,6 +103,5 @@ class BasicMAC:
         return attacker_input_shape, identifier_input_shape
 
     def _get_output_shape(self, scheme):
-        # self_args:
         attacker_output_shape = scheme["attacker_actions_onehot"]
         identifier_output_shape = scheme["identifier_actions_onehot"]
