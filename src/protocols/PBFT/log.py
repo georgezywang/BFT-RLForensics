@@ -50,22 +50,30 @@ class Entry():
         return len(self.commit_sigs) >= 2*self.args.f + 1
 
     def _add_preprepare(self, msg):
+        if self.is_preprepare_ready():
+            return False
         self.val = msg.val
+        return True
 
     def _add_prepare(self, msg):
         if msg.val != self.val:
             print("Current primary of Prepare message and log not matching (Message {}, Log entry {})".format(
                 msg.val,
                 self.val))
-            return
+            return False
+        if msg.signer_id in self.prepare_sigs:
+            return False
         self.prepare_sigs.append(msg.signer_id)
+        return True
 
     def _add_commit(self, msg):
         if msg.val != self.val:
             print("Current primary of Commit message and log not matching (Message {}, Log entry {})".format(
                 msg.val,
                 self.val))
-            return
+            return False
+        if msg.signer_id in self.commit_sigs:
+            return False
         self.commit_sigs.append(msg.signer_id)
-
+        return True
 
