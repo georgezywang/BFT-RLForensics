@@ -18,8 +18,7 @@ def create_message(args, params):
                          seq_num=params["seq_num"],
                          signer_id=params["signer_id"],
                          val=params["val"],
-                         receiver_id=params["receiver_id"],
-                         client_id=params["client_id"])
+                         receiver_id=params["receiver_id"])
     elif msg_type == "PrepareCertificate" or msg_type == "CommitCertificate" or msg_type == "NewView":
         return CertificateMsg(args=args,
                               msg_type=msg_type,
@@ -43,9 +42,8 @@ class PBFTMessage():
 
 
 class ClientMsg(PBFTMessage):
-    def __init__(self, args, view_num, seq_num, signer_id, val, receiver_id, simulator_id):
+    def __init__(self, args, view_num, seq_num, signer_id, val, receiver_id):
         super().__init__(args, "Client", view_num, seq_num, signer_id, val, receiver_id)
-        self.simulator_id = simulator_id
 
 
 class CertificateMsg(PBFTMessage):

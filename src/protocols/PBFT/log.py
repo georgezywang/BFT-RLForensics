@@ -99,6 +99,7 @@ class Entry():
         self.val = msg.val
         return True
 
+
 class ViewEntry():
     def __init__(self, args, view_num):
         self.args = args
@@ -110,7 +111,7 @@ class ViewEntry():
             print("Sequence number of message and log not matching, ignored (Message {}, Log entry {})".format(
                 msg.view_num, self.view_num))
             return
-        if msg.type != 4:
+        if msg.type != type_dict["ViewChange"]:
             print("Message type in ViewChange, NewView, Seal, or SealRequest, ignored")
             return
         self._add_view_change(msg)
@@ -123,3 +124,49 @@ class ViewEntry():
             return False
         self.view_change_sigs.append(msg.signer_id)
         return True
+
+
+class ClientLog():
+    def __init__(self, args):
+        self.args = args
+        self.entries = {}
+
+    def get_entry(self, seq_num):
+        if seq_num not in self.entries.keys():
+            self.entries[seq_num] = ConsensusEntry(self.args, seq_num)
+        return self.entries[seq_num]
+
+
+class ConsensusEntry():
+    def __init__(self, args, seq_num):
+        self.args = args
+        self.seq_num = seq_num
+        self.val_sigs = {}
+        self.visited = False
+
+    def add_message(self, msg):
+        if msg.seq_num != self.seq_num:
+            return
+        if msg.type != type_dict["BlockCommit"]:
+            print("Message type in ViewChange, NewView, Seal, or SealRequest, ignored")
+            return
+        self._add_block_commit(msg)
+
+    def get_block_committed_val(self):
+        ret = []
+        for val in self.val_sigs.keys():
+            if len(self.val_sigs[val]) >= 2 * self.args.f + 1:
+                ret.append(val)
+        if len(ret) != 0 and self.visited == False:
+            self.visited = True
+        return ret
+
+    def _add_block_commit(self, msg):
+        if msg.val in self.val_sigs.keys():
+            if msg.signer_id not in self.val_sigs[msg.val]:
+                self.val_sigs[msg.val].append(msg.signer_id)
+                return True
+        else:
+            self.val_sigs[msg.val] = [msg.signer_id]
+            return True
+        return False

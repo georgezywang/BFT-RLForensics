@@ -16,3 +16,21 @@ view_change_duration:
 simulator_id:
 
 max_message_num_per_round:
+
+# specify obs size and action size
+
+episode_limit:
+
+# reward
+identifier_reward_consensus_reached: 0
+attacker_reward_consensus_reached: 0
+identifier_reward_consensus_breached: -5
+attacker_reward_consensus_breached: 5
+identifier_reward_correct_detection: 3
+attacker_reward_correct_detection: -3
+identifier_reward_incorrect_detection: -3
+attacker_reward_incorrect_detection: 1
+
+# game
+terminate_after_consensus_breached: False
+steps_per_new_client_request: 5
