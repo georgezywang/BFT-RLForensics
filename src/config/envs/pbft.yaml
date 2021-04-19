@@ -2,9 +2,12 @@
 #node id is 0-indexed
 n_peers:
 f:
+# attacker:
 num_malicious:
+# identifier:
+num_transcripts_avail:
 
-#initialization
+#initialization (break things if they are not set to 0)
 initialized_seq_num: 0
 initialized_view_num: 0
 initialized_primary: 0
@@ -15,11 +18,12 @@ commit_timer_limit:
 view_change_duration:
 simulator_id:
 
+# both received and send
 max_message_num_per_round:
 
 # specify obs size and action size
 
-episode_limit:
+episode_limit: 500
 
 # reward
 identifier_reward_consensus_reached: 0
@@ -30,6 +34,7 @@ identifier_reward_correct_detection: 3
 attacker_reward_correct_detection: -3
 identifier_reward_incorrect_detection: -3
 attacker_reward_incorrect_detection: 1
+attacker_reward_invalid_certificate: -0.1
 
 # game
 terminate_after_consensus_breached: False

@@ -1,13 +1,14 @@
-type_dict = {"PrePrepare": 1,
-             "Prepare": 2,
-             "Commit": 3,
-             "ViewChange": 4,
-             "NewView": 5,
-             "PrepareCertificate": 6,
-             "CommitCertificate": 7,
-             "Client": 8,
-             "BlockCommit": 9,
-             "RequestClient": 10, }
+type_dict = {"PrePrepare": 0,
+             "Prepare": 1,
+             "Commit": 2,
+             "ViewChange": 3,
+             "NewView": 4,
+             "PrepareCertificate": 5,
+             "CommitCertificate": 6,
+             "BlockCommit": 7,
+             "RequestClient": 8,
+             "No-op": 9,
+             "Client": 10, }
 
 
 def create_message(args, params):
@@ -28,7 +29,26 @@ def create_message(args, params):
                               val=params["val"],
                               receiver_id=params["receiver_id"],
                               certificate=params["certificate"])
+    elif msg_type == "RequestClient":
+        return RequestClientMsg(args=args,
+                                view_num=params["view_num"],
+                                seq_num=params["seq_num"],
+                                signer_id=params["signer_id"],
+                                val=params["val"])
+    elif msg_type == "ViewChange":
+        return ViewChangeMsg(args=args,
+                             view_num=params["view_num"],
+                             signer_id=params["signer_id"],
+                             receiver_id=params["receiveir_id"])
 
+    else:
+        return PBFTMessage(args=args,
+                           msg_type=msg_type,
+                           view_num=params["view_num"],
+                           seq_num=params["seq_num"],
+                           signer_id=params["signer_id"],
+                           val=params["val"],
+                           receiver_id=params["receiver_id"])
 
 class PBFTMessage():
     def __init__(self, args, msg_type, view_num, seq_num, signer_id, val, receiver_id):
@@ -57,7 +77,7 @@ class ViewChangeMsg(PBFTMessage):
         super().__init__(args, "ViewChange", view_num, float("inf"), signer_id, float("inf"), receiver_id)
 
 
-class RequestClient(PBFTMessage):
+class RequestClientMsg(PBFTMessage):
     def __init__(self, args, view_num, seq_num, signer_id, val):
         super().__init__(args, "RequestClient", view_num, seq_num, signer_id, val, args.simulator_id)
         # Please sync the request back to seq_num

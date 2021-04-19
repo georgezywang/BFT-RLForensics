@@ -4,16 +4,17 @@ from protocols.PBFT.log import Log
 from protocols.PBFT.message import create_message
 
 state_dict = {"normal": 0, "view_changing": 1}
-type_dict = {"PrePrepare": 1,
-             "Prepare": 2,
-             "Commit": 3,
-             "ViewChange": 4,
-             "NewView": 5,
-             "PrepareCertificate": 6,
-             "CommitCertificate": 7,
-             "Client": 8,
-             "RequestClient": 9}
-
+type_dict = {"PrePrepare": 0,
+             "Prepare": 1,
+             "Commit": 2,
+             "ViewChange": 3,
+             "NewView": 4,
+             "PrepareCertificate": 5,
+             "CommitCertificate": 6,
+             "BlockCommit": 7,
+             "RequestClient": 8,
+             "No-op": 9,
+             "Client": 10, }
 
 class PBFTagent():
     def __init__(self, args):
@@ -308,3 +309,40 @@ class PBFTagent():
 
     def _check_certificate(self, cert):
         return len(cert) >= 2 * self.args.f + 1
+
+
+class PBFTagent_wrapper():  # attacker
+    def __init__(self, args):
+        self.args = args
+        self.id = 0
+        self.mainlog = None
+
+    def reset(self, replica_id):
+        self.id = replica_id
+        self.mainlog = Log(self.args)
+
+    def handle_msgs(self, msgs):
+        for msg in msgs:
+            self.on_msg(msg)
+
+    def on_msg(self, msg):
+        if msg.msg_type == type_dict["PrePrepare"]:
+            self.mainlog.get_entry(msg.seq_num).add(msg)
+        if msg.msg_type == type_dict["Prepare"]:
+            self.mainlog.get_entry(msg.seq_num).add(msg)
+        if msg.msg_type == type_dict["Commit"]:
+            self.mainlog.get_entry(msg.seq_num).add(msg)
+
+    def check_certificate_validity(self, msg, friend_ids):
+        flag = True
+        msg_type = msg.msg_type
+        if (msg_type == type_dict["PrepareCertificate"] or msg_type == type_dict["CommitCertificate"]
+                or msg_type == type_dict["NewView"]):
+            for sig_id in msg.certificate:
+                is_friend = sig_id in friend_ids
+                is_collected = (msg_type == type_dict["PrepareCertificate"] and sig_id in self.mainlog.get_entry[msg.seq_num].prepare_sigs) \
+                               or (msg_type == type_dict["CommitCertificate"] and sig_id in self.mainlog.get_entry[msg.seq_num].commit_sigs)
+                if not (is_friend or is_collected):
+                    flag = False
+
+        return flag

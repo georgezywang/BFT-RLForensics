@@ -1,10 +1,11 @@
 import copy
 from random import random
+import numpy as np
 
 from env.multiagentenv import MultiAgentEnv
 from protocols.PBFT.log import ClientLog
 from protocols.PBFT.message import create_message
-from protocols.PBFT.replica import PBFTagent
+from protocols.PBFT.replica import PBFTagent, PBFTagent_wrapper
 
 # player 0: attacker
 # player 1: identifier
@@ -12,16 +13,17 @@ from protocols.PBFT.replica import PBFTagent
 client_vals = [0, 1, 2, 3]
 consensus_status = {"violated": 0,
                     "normal": 1}
-type_dict = {"PrePrepare": 1,
-             "Prepare": 2,
-             "Commit": 3,
-             "ViewChange": 4,
-             "NewView": 5,
-             "PrepareCertificate": 6,
-             "CommitCertificate": 7,
-             "Client": 8,
-             "BlockCommit": 9,
-             "RequestClient": 10, }
+type_dict = {"PrePrepare": 0,
+             "Prepare": 1,
+             "Commit": 2,
+             "ViewChange": 3,
+             "NewView": 4,
+             "PrepareCertificate": 5,
+             "CommitCertificate": 6,
+             "BlockCommit": 7,
+             "RequestClient": 8,
+             "No-op": 9,
+             "Client": 10, }
 
 
 class ProtocolSimulator(MultiAgentEnv):
@@ -32,6 +34,7 @@ class ProtocolSimulator(MultiAgentEnv):
         self.n_malicious = args.num_malicious
         self.max_messages_per_round = args.max_message_num_per_round
         self.honest_replicas = [PBFTagent(args) for _ in range(self.n_replicas - self.n_malicious)]
+        self.malicious_replicas = [PBFTagent_wrapper(args) for _ in range(self.n_malicious)]
 
         self.honest_ids = []
         self.malicious_ids = []
@@ -39,11 +42,14 @@ class ProtocolSimulator(MultiAgentEnv):
         self.client_request_vals = None
         self.client_request_seq_num = 0
         self.replica_msg_buffers = {}
+        self.replica_static_msg_buffers = {}  # only for collecting messages for obs
         self.total_msgs_per_round = None
         self.replica_reply_log = None
 
         self.attacker_reward = 0
         self.identifier_reward = 0
+
+        self.identifier_transcript_ids = None
 
     def reset(self):
         self.attacker_reward = 0
@@ -53,9 +59,22 @@ class ProtocolSimulator(MultiAgentEnv):
         replica_ids = random.shuffle([idx for idx in range(self.n_replicas)])
         self.malicious_ids = replica_ids[0:self.n_malicious]
         self.honest_ids = replica_ids[self.n_malicious:]
+
+        # initializes honest replicas
         for idx in range(self.n_replicas - self.n_malicious):
             self.honest_replicas[idx].reset(self.honest_ids[idx])
+
+        # initializes malicious replicas
+        for idx in range(self.n_malicious):
+            self.malicious_replicas[idx].reset(self.malicious_ids[idx])
+
+        # initialize msg buffers
+        for idx in range(self.n_replicas):
             self.replica_msg_buffers[idx] = []
+            self.replica_static_msg_buffers[idx] = []
+
+        # assign transcripts accessible to the identifier
+        self.identifier_transcript_ids = random.sample(range(self.n_replicas), self.args.num_transcripts_avail)
 
         # reset basics
         self.round_counter = 0
@@ -88,11 +107,19 @@ class ProtocolSimulator(MultiAgentEnv):
             self.replica_msg_buffers[msg.receiver_id].append(copy.deepcopy(msg))
         self.total_msgs_per_round = []
 
+        for r_id in range(self.n_replicas):
+            self.replica_static_msg_buffers[r_id] = copy.deepcopy(
+                self.replica_msg_buffers[r_id][:self.max_messages_per_round])
+
         # gather responses and empty buffers of scripted protocol agents
         # optional: simulate traffic overflow scenario (fix the size of identifier's obs)
         for r in self.honest_replicas:
             self.total_msgs_per_round.extend(
                 r.handle_msgs(self.replica_msg_buffers[r.id][0:self.max_messages_per_round]))
+            self.replica_msg_buffers[r.id] = self.replica_msg_buffers[r.id][self.max_messages_per_round:]
+
+        for r in self.malicious_replicas:
+            r.handle_msgs(self.replica_msg_buffers[r.id][0:self.max_messages_per_round])
             self.replica_msg_buffers[r.id] = self.replica_msg_buffers[r.id][self.max_messages_per_round:]
 
     def step(self, actions):
@@ -159,24 +186,43 @@ class ProtocolSimulator(MultiAgentEnv):
                     status = consensus_status["violated"]
         return status
 
-    def _parse_actions(self, actions):
+    def _parse_actions(self, attacker_action, identifier_action):
         # TODO: output attacker's messages and identifier's choices of attackers
-        return [], []
+        num_msg_type = 10  # no client type, 9 is no-op
+        msg_action_space = num_msg_type + self.args.num_malicious + \
+                           self.args.episode_limit / 4 + self.args.episode_limit / 4 + \
+                           len(client_vals) + self.args.n_peers + self.args.n_peers
+        attacker_action_d = np.reshape(attacker_action, (self.args.max_message_num_per_round, msg_action_space))
+        attacker_ret = []
+        for idx in range(self.args.max_message_num_per_round):
+            msg = self._parse_input_message(attacker_action_d[idx])
+            if msg is not None:
+                attacker_ret.append(msg)
 
-    def get_obs(self):
-        raise NotImplementedError
+        identifier_ret = [r_id for r_id in range(self.n_replicas) if identifier_action[r_id] == 1]
+        return attacker_ret, identifier_ret
 
-    def get_obs_agent(self, agent_id):
-        return self.get_obs()[agent_id]
+    def get_attacker_obs(self):
+        obs = []
+        idx = 0
+        for r_id in self.malicious_ids:
+            obs.extend(onehot(idx, self.n_malicious))
+            for msg in self.replica_static_msg_buffers[r_id]:
+                obs.extend(self._replica_msg_to_malicious_input(msg))
+            num_decoy_msg = self.max_messages_per_round - len(self.replica_static_msg_buffers[r_id])
+            obs.extend(self._decoy_msgs(num_decoy_msg))
+            idx += 1
+        return obs
 
-    def get_obs_size(self):
-        raise NotImplementedError
-
-    def get_state(self):
-        raise NotImplementedError
-
-    def get_state_size(self):
-        raise NotImplementedError
+    def get_identifier_obs(self):
+        obs = []
+        for r_id in self.identifier_transcript_ids:
+            obs.extend(onehot(r_id, self.n_replicas))
+            for msg in self.replica_static_msg_buffers[r_id]:
+                obs.extend(self._replica_msg_to_input(msg))
+            num_decoy_msg = self.max_messages_per_round - len(self.replica_static_msg_buffers[r_id])
+            obs.extend(self._decoy_msgs(num_decoy_msg))
+        return obs
 
     def get_avail_actions(self):
         raise NotImplementedError
@@ -184,14 +230,199 @@ class ProtocolSimulator(MultiAgentEnv):
     def get_avail_agent_actions(self, agent_id):
         return self.get_avail_actions()[agent_id]
 
-    def get_total_actions(self):
-        raise NotImplementedError
-
     def get_env_info(self):
-        env_info = {"obs_shape": self.get_obs_size(),
-                    "reward_shape": 2,
-                    "n_actions": self.get_total_actions(),
-                    "adjacent_agents_shape": 0,
+        env_info = {"identifier_obs_shape": self.args.identifier_obs_shape,
+                    # FIXME: temporarily shapings specified by env
+                    "attacker_obs_shape": self.args.attacker_obs_shape,
+                    "identifier_reward_shape": 1,
+                    "attacker_reward_shape": 1,
+                    "n_identifier_actions": self.args.n_identifier_actions,
+                    "n_attacker_actions": self.args.n_attacker_actions,
                     "n_agents": 2,
                     "episode_limit": self.episode_limit}
         return env_info
+
+    def get_attacker_action_size(self):
+        num_msg_type = 10  # no client type, 9 is no-op
+        msg_action_space = num_msg_type + self.args.num_malicious + \
+                           self.args.episode_limit / 4 + self.args.episode_limit / 4 + \
+                           len(client_vals) + self.args.n_peers + self.args.n_peers
+        return msg_action_space * self.args.max_message_num_per_round * self.args.num_malicious
+
+    def get_identifier_action_size(self):
+        return self.args.n_peers
+
+    def get_attacker_obs_size(self):
+        num_msg_type = 11  # with client
+        msg_obs_space = num_msg_type + self.args.episode_limit / 4 + \
+                        self.args.episode_limit / 4 + self.args.n_peers + \
+                        len(client_vals) + self.n_malicious + self.args.n_peers
+        malicious_ids = self.n_malicious * self.n_malicious
+        return self.args.max_message_num_per_round * msg_obs_space * self.args.num_malicious + malicious_ids
+
+    def get_identifier_obs_size(self):
+        num_msg_type = 11  # with client
+        msg_obs_space = num_msg_type + self.args.episode_limit / 4 + \
+                        self.args.episode_limit / 4 + self.args.n_peers + \
+                        len(client_vals) + self.args.n_peers + self.args.n_peers
+        transcript_ids = self.n_replicas * self.args.num_transcripts_avail
+        return self.args.max_message_num_per_round * self.args.num_transcripts_avail * msg_obs_space + transcript_ids
+
+    def _parse_input_message(self, msg_input):
+        num_msg_type = 10  # no client type, 9 is no-op
+        # msg_action_space = num_msg_type + self.args.num_malicious + \
+        #                    self.args.episode_limit / 4 + self.args.episode_limit / 4 + \
+        #                    len(client_vals) + self.args.n_peers + self.args.n_peers
+        params = {}
+        idx = 0
+        msg_type_input = msg_input[idx: num_msg_type]
+        params["msg_type"] = rev_onehot(msg_type_input)
+        if params["msg_type"] == type_dict["No-op"]:
+            return None
+
+        idx = num_msg_type
+        sender_id_input = msg_input[idx: idx + self.n_malicious]
+        params["signer_id"] = self.malicious_ids[rev_onehot(sender_id_input)]
+
+        idx += self.n_malicious
+        view_num_input = msg_input[idx: idx + self.episode_limit / 4]
+        params["view_num"] = rev_onehot(view_num_input)
+
+        idx += self.episode_limit / 4
+        seq_num_input = msg_input[idx: idx + self.episode_limit / 4]
+        params["seq_num"] = rev_onehot(seq_num_input)
+
+        idx += self.episode_limit / 4
+        val_input = msg_input[idx: idx + len(client_vals)]
+        params["val"] = rev_onehot(val_input)
+
+        idx += len(client_vals)
+        receiver_id_input = msg_input[idx: idx + self.n_replicas]
+        params["receiver_id"] = rev_onehot(receiver_id_input)
+
+        idx += self.n_replicas
+        certificate_input = msg_input[idx:]
+        params["certificate"] = rev_indices(certificate_input)
+
+        msg = create_message(self.args, params)
+        r_id = msg.signer_id
+        for r in self.malicious_replicas:
+            if not (r.id == r_id and r.check_certificate_validity(msg, self.malicious_ids)):
+                return None
+
+        return msg
+
+    def _replica_msg_to_malicious_input(self, msg):
+        inputs = []
+        # add msg_type
+        num_msg_type = 11  # with noop and client
+        inputs.extend(onehot(msg.msg_type, num_msg_type))
+        # add signer_id
+        inputs.extend(onehot(msg.signer_id, self.args.n_peers)]
+        # add view_num
+        inputs.extend(onehot(msg.view_num, self.args.episode_limit / 4))
+        # add seq_num
+        inputs.extend(onehot(msg.seq_num, self.args.episode_limit / 4))
+        # add vals
+        inputs.extend(onehot(msg.val, len(client_vals)))
+        # add receiver_id
+        inputs.extend(onehot(self._malicious_id_idx(msg.receiver_id), self.n_malicious))
+        # add certificate
+        if (msg.msg_type == type_dict["PrepareCertificate"] or
+                msg.msg_type == type_dict["CommitCertificate"] or msg.msg_type == type_dict["NewView"]):
+            inputs.extend(indices(msg.certificate, self.args.n_peers))
+        else:
+            zeros = [0] * self.args.n_peers
+            inputs.extend(zeros)
+        return inputs
+
+    def _replica_msg_to_input(self, msg):
+        inputs = []
+        # add msg_type
+        num_msg_type = 11  # with noop and client
+        inputs.extend(onehot(msg.msg_type, num_msg_type))
+        # add signer_id
+        inputs.extend(onehot(msg.signer_id, self.args.n_peers)]
+        # add view_num
+        inputs.extend(onehot(msg.view_num, self.args.episode_limit / 4))
+        # add seq_num
+        inputs.extend(onehot(msg.seq_num, self.args.episode_limit / 4))
+        # add vals
+        inputs.extend(onehot(msg.val, len(client_vals)))
+        # add receiver_id
+        inputs.extend(onehot(msg.receiver_id, self.n_replicas))
+        # add certificate
+        if (msg.msg_type == type_dict["PrepareCertificate"] or
+                msg.msg_type == type_dict["CommitCertificate"] or msg.msg_type == type_dict["NewView"]):
+            inputs.extend(indices(msg.certificate, self.args.n_peers))
+        else:
+            zeros = [0] * self.args.n_peers
+            inputs.extend(zeros)
+        return inputs
+
+    def _decoy_msgs(self, num):
+        num_msg_type = 11
+        msg_obs_space = num_msg_type + self.args.episode_limit / 4 + \
+                        self.args.episode_limit / 4 + self.args.n_peers + \
+                        len(client_vals) + self.args.n_peers + self.args.n_peers
+        return [0] * msg_obs_space * num
+
+    def _malicious_id_idx(self, r_id):
+        for idx in range(len(self.malicious_ids)):
+            if self.malicious_ids[idx] == r_id:
+                return idx
+        print("Invalid id at _malicious_id_idx")
+        return 0
+"""
+attacker action type: * self.args.max_message_num_per_round * self.num_malicious
+    - message type: 0-9                                 num_action_space = 10  *9 is no-op
+    - signer_id: self.malicious_ids                     num_action_space = self.args.num_malicious
+    - view_num: 0-self.args.episode_limit/4             num_action_space = self.args.episode_limit/4  # max possible num_action_space
+    - seq_num: 0-self.args.episode_limit/4              num_action_space = self.args.episode_limit/4
+    - val: client_vals (0-3)                            num_action_space = len(client_vals) (4)                  
+    - receiver_id: 0-self.args.n_peers-1                num_actions_space = self.args.n_peers
+    - certificate: (0-self.args.n_peers-1)*2*self.f+1   num_actions_space = self.args.n_peers choose 0/1
+    
+total_action_space: self.args.max_message_num_per_round * self.num_malicious * 
+            (10 + self.args.num_malicious + self.args.episode_limit/2 + 4 + self.args.n_peers + self.args.n_peers)
+
+self.msg_type = type_dict[msg_type]
+        self.view_num = view_num
+        self.seq_num = seq_num
+        self.signer_id = signer_id
+        self.val = val
+        self.receiver_id = receiver_id
+        
+attacker obs type: self.args.max_message_num_per_round * [self.args.episode_limit/2 + self.n_peers*2 + self.val + self.n_peers]
+"""
+
+"""
+identifier action type：
+    - self.args.n_peers
+"""
+
+
+def onehot(x, n):
+    ret = [0] * n
+    if x != float("inf") and 0 <= x < n:
+        ret[x] = 1
+    return ret
+
+
+def rev_onehot(x):
+    for idx in range(len(x)):
+        if x[idx] == 1:
+            return idx
+    return -1
+
+
+def indices(x, n):
+    ret = [0] * n
+    for idx in x:
+        ret[idx] = 1
+    return ret
+
+
+def rev_indices(x):
+    ret = [idx for idx in range(len(x)) if x[idx] == 1]
+    return ret
