@@ -1,19 +1,19 @@
 """
 Code adapted from https://github.com/TonghanWang/ROMA
 """
-import copy
 
-from env import REGISTRY as env_REGISTRY
 from functools import partial
-from components.episode_buffer import EpisodeBatch
+
 import numpy as np
+
+from components.episode_buffer import EpisodeBatch
+from env import REGISTRY as env_REGISTRY
 
 
 class EpisodeRunner:
 
     def __init__(self, args, logger):
         self.args = args
-        self.n_agents = self.args.n_agents
         self.logger = logger
         self.batch_size = self.args.batch_size_run
         assert self.batch_size == 1
@@ -24,8 +24,10 @@ class EpisodeRunner:
 
         self.t_env = 0
 
-        self.train_returns = []
-        self.test_returns = []
+        self.identifier_train_returns = []
+        self.attacker_train_returns = []
+        self.identifier_test_returns = []
+        self.attacker_test_returns = []
         self.train_stats = {}
         self.test_stats = {}
 
@@ -55,37 +57,33 @@ class EpisodeRunner:
         self.reset()
 
         terminated = False
-        episode_return = [0] * self.n_agents
+        attacker_episode_return = 0
+        identifier_episode_return = 0
         self.mac.init_hidden(batch_size=self.batch_size)
 
         while not terminated:
-            if self.env.is_masked():
-                pre_transition_data = {
-                    "avail_actions": [self.env.get_avail_actions()],
-                    "obs": [self.env.get_obs()],
-                    "adjacent_agents": [self.env.get_adj()],
-                }
-            else:
-                pre_transition_data = {
-                    "state": [self.env.get_state()],
-                    "avail_actions": [self.env.get_avail_actions()],
-                    "obs": [self.env.get_obs()],
-                }
+            pre_transition_data = {
+                "attacker_obs": [self.env.get_attacker_obs()],
+                "identifier_obs": [self.env.get_identifier_obs()],
+            }
 
             self.batch.update(pre_transition_data, ts=self.t)
 
             # Pass the entire batch of experiences up till now to the agents
             # Receive the actions for each agent at this timestep in a batch of size 1
-            actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
+            attacker_actions, identifier_actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
             # pq: [1, agent_num, control_dim]
 
-            rewards, terminated, env_info = self.env.step(actions[0])
+            rewards, terminated, env_info = self.env.step(attacker_actions[0], identifier_actions[0])
 
-            episode_return = [episode_return[idx] + rewards[idx] for idx in range(self.n_agents)]
+            attacker_episode_return += rewards[0]
+            identifier_episode_return += rewards[1]
 
             post_transition_data = {
-                "actions": actions,
-                "rewards": rewards,
+                "attacker_action": attacker_actions,
+                "identifier_action": identifier_actions,
+                "attacker_reward": rewards[0],
+                "identifier_reward": rewards[1],
                 "terminated": [(terminated,)],
             }
 
@@ -93,26 +91,20 @@ class EpisodeRunner:
 
             self.t += 1
 
-        if self.env.is_masked():
-            last_data = {
-                "avail_actions": [self.env.get_avail_actions()],
-                "obs": [self.env.get_obs()],
-                "adjacent_agents": [self.env.get_adj()],
-            }
-        else:
-            last_data = {
-                "state": [self.env.get_state()],
-                "avail_actions": [self.env.get_avail_actions()],
-                "obs": [self.env.get_obs()],
-            }
+        last_data = {
+            "attacker_obs": [self.env.get_attacker_obs()],
+            "identifier_obs": [self.env.get_identifier_obs()],
+        }
         self.batch.update(last_data, ts=self.t)
 
         # Select actions in the last stored state
-        actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
-        self.batch.update({"actions": actions,}, ts=self.t)
+        attacker_actions, identifier_actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
+        self.batch.update({"attacker_action": attacker_actions,
+                           "identifier_action": identifier_actions}, ts=self.t)
 
         cur_stats = self.test_stats if test_mode else self.train_stats
-        cur_returns = self.test_returns if test_mode else self.train_returns
+        attacker_cur_returns = self.attacker_test_returns if test_mode else self.attacker_train_returns
+        identifier_cur_returns = self.identifier_test_returns if test_mode else self.identifier_train_returns
         log_prefix = "test_" if test_mode else ""
         cur_stats.update({k: cur_stats.get(k, 0) + env_info.get(k, 0) for k in set(cur_stats) | set(env_info)})
         cur_stats["n_episodes"] = 1 + cur_stats.get("n_episodes", 0)
@@ -121,24 +113,30 @@ class EpisodeRunner:
         if not test_mode:
             self.t_env += self.t
 
-        cur_returns.append(episode_return)
+        attacker_cur_returns.append(attacker_episode_return)
+        identifier_cur_returns.append(identifier_episode_return)
 
-        if test_mode and (len(self.test_returns) == self.args.test_nepisode):
-            self._log(cur_returns, cur_stats, log_prefix)
+        if test_mode and (len(self.attacker_test_returns) == self.args.test_nepisode):
+            self._log(attacker_cur_returns, identifier_cur_returns, cur_stats, log_prefix)
         elif self.t_env - self.log_train_stats_t >= self.args.runner_log_interval:
-            self._log(cur_returns, cur_stats, log_prefix)
+            self._log(attacker_cur_returns, identifier_cur_returns, cur_stats, log_prefix)
             if hasattr(self.mac.action_selector, "epsilon"):
                 self.logger.log_stat("epsilon", self.mac.action_selector.epsilon, self.t_env)
             self.log_train_stats_t = self.t_env
 
         return self.batch
 
-    def _log(self, returns, stats, prefix):
-        for agent_idx in range(self.n_agents):
-            agent_returns = [returns[t][agent_idx] for t in range(len(returns))]
-            self.logger.log_stat(prefix + "agent {} return_mean".format(agent_idx), np.mean(agent_returns), self.t_env)
-            self.logger.log_stat(prefix + "agent {} return_std".format(agent_idx), np.std(agent_returns), self.t_env)
-        returns.clear()
+    def _log(self, attacker_returns, identifier_returns, stats, prefix):
+
+        self.logger.log_stat(prefix + "attacker agent return_mean {} and std {}".format(np.mean(attacker_returns),
+                                                                                        np.std(attacker_returns),
+                                                                                        self.t_env))
+        attacker_returns.clear()
+
+        self.logger.log_stat(prefix + "identifier agent return_mean {} and std {}".format(np.mean(identifier_returns),
+                                                                                          np.std(identifier_returns),
+                                                                                          self.t_env))
+        identifier_returns.clear()
 
         for k, v in stats.items():
             if k != "n_episodes":
