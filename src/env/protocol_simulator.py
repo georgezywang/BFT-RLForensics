@@ -136,7 +136,8 @@ class ProtocolSimulator(MultiAgentEnv):
         self.identifier_reward = 0
         terminated = False
 
-        attacker_messages, identifier_choices = self._parse_actions(actions)
+        attacker_action, identifier_action = actions
+        attacker_messages, identifier_choices = self._parse_actions(attacker_action, identifier_action)
         self.total_msgs_per_round.append(attacker_messages)
 
         self._handle_reply_msgs_to_client()
@@ -231,14 +232,12 @@ class ProtocolSimulator(MultiAgentEnv):
         return self.get_avail_actions()[agent_id]
 
     def get_env_info(self):
-        env_info = {"identifier_obs_shape": self.args.identifier_obs_shape,
-                    # FIXME: temporarily shapings specified by env
-                    "attacker_obs_shape": self.args.attacker_obs_shape,
+        env_info = {"identifier_obs_shape": self.get_identifier_obs_size(),
+                    "attacker_obs_shape": self.get_attacker_obs_size(),
                     "identifier_reward_shape": 1,
                     "attacker_reward_shape": 1,
-                    "n_identifier_actions": self.args.n_identifier_actions,
-                    "n_attacker_actions": self.args.n_attacker_actions,
-                    "n_agents": 2,
+                    "n_identifier_actions": self.get_identifier_action_size(),
+                    "n_attacker_actions": self.get_attacker_action_size(),
                     "episode_limit": self.episode_limit}
         return env_info
 
