@@ -1,25 +1,26 @@
 #general
 #node id is 0-indexed
-n_peers:
-f:
+n_peers: 4
+# n_peers = 3f + 1
+f: 1
 # attacker:
-num_malicious:
+num_malicious: 2
 # identifier:
-num_transcripts_avail:
+num_transcripts_avail: 2
 
 #initialization (break things if they are not set to 0)
 initialized_seq_num: 0
 initialized_view_num: 0
 initialized_primary: 0
 
-work_window_size:
-idle_timer_limit:
-commit_timer_limit:
-view_change_duration:
-simulator_id:
+work_window_size: 10
+idle_timer_limit: 5
+commit_timer_limit: 5
+view_change_duration: 5
+simulator_id: 25
 
 # both received and send
-max_message_num_per_round:
+max_message_num_per_round: 4
 
 # specify obs size and action size
 
