@@ -318,7 +318,7 @@ class ProtocolSimulator(MultiAgentEnv):
         num_msg_type = 11  # with noop and client
         inputs.extend(onehot(msg.msg_type, num_msg_type))
         # add signer_id
-        inputs.extend(onehot(msg.signer_id, self.args.n_peers)]
+        inputs.extend(onehot(msg.signer_id, self.args.n_peers))
         # add view_num
         inputs.extend(onehot(msg.view_num, self.args.episode_limit / 4))
         # add seq_num
@@ -342,7 +342,7 @@ class ProtocolSimulator(MultiAgentEnv):
         num_msg_type = 11  # with noop and client
         inputs.extend(onehot(msg.msg_type, num_msg_type))
         # add signer_id
-        inputs.extend(onehot(msg.signer_id, self.args.n_peers)]
+        inputs.extend(onehot(msg.signer_id, self.args.n_peers))
         # add view_num
         inputs.extend(onehot(msg.view_num, self.args.episode_limit / 4))
         # add seq_num
