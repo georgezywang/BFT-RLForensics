@@ -245,7 +245,7 @@ class ProtocolSimulator(MultiAgentEnv):
         num_msg_type = 10  # no client type, 9 is no-op
         msg_action_space = num_msg_type + self.args.num_malicious + \
                            self.args.episode_limit / 4 + self.args.episode_limit / 4 + \
-                           len(client_vals) + self.args.n_peers + self.args.n_peers
+                           len(client_vals) + self.args.n_peers + self.args.n_peers*2
         return msg_action_space * self.args.max_message_num_per_round * self.args.num_malicious
 
     def get_identifier_action_size(self):
@@ -255,7 +255,7 @@ class ProtocolSimulator(MultiAgentEnv):
         num_msg_type = 11  # with client
         msg_obs_space = num_msg_type + self.args.episode_limit / 4 + \
                         self.args.episode_limit / 4 + self.args.n_peers + \
-                        len(client_vals) + self.n_malicious + self.args.n_peers
+                        len(client_vals) + self.n_malicious + self.args.n_peers*2
         malicious_ids = self.n_malicious * self.n_malicious
         return self.args.max_message_num_per_round * msg_obs_space * self.args.num_malicious + malicious_ids
 
@@ -263,7 +263,7 @@ class ProtocolSimulator(MultiAgentEnv):
         num_msg_type = 11  # with client
         msg_obs_space = num_msg_type + self.args.episode_limit / 4 + \
                         self.args.episode_limit / 4 + self.args.n_peers + \
-                        len(client_vals) + self.args.n_peers + self.args.n_peers
+                        len(client_vals) + self.args.n_peers + self.args.n_peers*2
         transcript_ids = self.n_replicas * self.args.num_transcripts_avail
         return self.args.max_message_num_per_round * self.args.num_transcripts_avail * msg_obs_space + transcript_ids
 
@@ -301,12 +301,13 @@ class ProtocolSimulator(MultiAgentEnv):
 
         idx += self.n_replicas
         certificate_input = msg_input[idx:]
-        params["certificate"] = rev_indices(certificate_input)
+        params["certificate"] = rev_list_onehot(certificate_input)
 
         msg = create_message(self.args, params)
         r_id = msg.signer_id
         for r in self.malicious_replicas:
             if not (r.id == r_id and r.check_certificate_validity(msg, self.malicious_ids)):
+                self.attacker_reward += self.args.attacker_reward_invalid_certificate
                 return None
 
         return msg
@@ -329,9 +330,9 @@ class ProtocolSimulator(MultiAgentEnv):
         # add certificate
         if (msg.msg_type == type_dict["PrepareCertificate"] or
                 msg.msg_type == type_dict["CommitCertificate"] or msg.msg_type == type_dict["NewView"]):
-            inputs.extend(indices(msg.certificate, self.args.n_peers))
+            inputs.extend(list_onehot(msg.certificate, self.args.n_peers))
         else:
-            zeros = [0] * self.args.n_peers
+            zeros = [0] * self.args.n_peers*2
             inputs.extend(zeros)
         return inputs
 
@@ -353,7 +354,7 @@ class ProtocolSimulator(MultiAgentEnv):
         # add certificate
         if (msg.msg_type == type_dict["PrepareCertificate"] or
                 msg.msg_type == type_dict["CommitCertificate"] or msg.msg_type == type_dict["NewView"]):
-            inputs.extend(indices(msg.certificate, self.args.n_peers))
+            inputs.extend(list_onehot(msg.certificate, self.args.n_peers))
         else:
             zeros = [0] * self.args.n_peers
             inputs.extend(zeros)
@@ -363,7 +364,7 @@ class ProtocolSimulator(MultiAgentEnv):
         num_msg_type = 11
         msg_obs_space = num_msg_type + self.args.episode_limit / 4 + \
                         self.args.episode_limit / 4 + self.args.n_peers + \
-                        len(client_vals) + self.args.n_peers + self.args.n_peers
+                        len(client_vals) + self.args.n_peers + self.args.n_peers*2
         return [0] * msg_obs_space * num
 
     def _malicious_id_idx(self, r_id):
@@ -415,13 +416,21 @@ def rev_onehot(x):
     return -1
 
 
-def indices(x, n):
-    ret = [0] * n
-    for idx in x:
-        ret[idx] = 1
+def list_onehot(x, n):  # for certificate
+    ret = []
+    for idx in range(n):
+        if idx in x:  # chosen
+            ret.extend([1, 0])
+        else:
+            ret.extend([0, 1])
     return ret
 
 
-def rev_indices(x):
-    ret = [idx for idx in range(len(x)) if x[idx] == 1]
+def rev_list_onehot(x):  # for certificates
+    ret = []
+    for idx in range(len(x)/2):
+        if x[2*idx] == 1:  # chosen
+            ret.append(idx)
     return ret
+
+

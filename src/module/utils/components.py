@@ -1,8 +1,8 @@
 import torch
-import torch.nn.functional as F
 import torch.nn as nn
+import torch.nn.functional as F
 
-from utils.utils import identity, fanin_init, product_of_gaussians, LayerNorm
+from utils.utils import identity, fanin_init, LayerNorm
 
 
 class MLPMultiGaussianEncoder(nn.Module):

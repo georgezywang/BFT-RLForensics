@@ -1,7 +1,5 @@
-from env.unfair_game.gridmaze import GridMaze
-from env.unfair_game.surviving import Surviving
+from env.protocol_simulator import ProtocolSimulator
 
 REGISTRY = {}
 
-REGISTRY["gridmaze"] = GridMaze
-REGISTRY["surviving"] = Surviving
+REGISTRY["protocol"] = ProtocolSimulator

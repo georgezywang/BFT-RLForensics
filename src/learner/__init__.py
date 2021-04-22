@@ -1,7 +1,6 @@
-from learner.nash_q_learner import NashQLearner
-from learner.q_learner import QLearner
+from learner.learner import SeparateLearner
 
 REGISTRY = {}
 
-REGISTRY["q_learner"] = QLearner
+REGISTRY["separate_learner"] = SeparateLearner
 

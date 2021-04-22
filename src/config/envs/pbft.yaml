@@ -40,3 +40,8 @@ attacker_reward_invalid_certificate: -0.1
 # game
 terminate_after_consensus_breached: False
 steps_per_new_client_request: 5
+
+# client vals (break things if changed)
+total_client_vals: 4
+
+n_agents: 2

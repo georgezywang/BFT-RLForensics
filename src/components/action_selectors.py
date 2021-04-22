@@ -7,6 +7,7 @@ from .epsilon_schedules import DecayThenFlatSchedule
 
 REGISTRY = {}
 
+
 class EpsilonGreedyActionSelector():
 
     def __init__(self, args):
@@ -36,7 +37,8 @@ class EpsilonGreedyActionSelector():
         picked_actions = pick_random * random_actions + (1 - pick_random) * masked_q_values.max(dim=2)[1]
         if not (torch.gather(avail_actions, dim=2, index=picked_actions.unsqueeze(2)) > 0.99).all():
             print((torch.gather(avail_actions, dim=2, index=random_actions.unsqueeze(2)) <= 0.99).squeeze())
-            print((torch.gather(avail_actions, dim=2, index=masked_q_values.max(dim=2)[1].unsqueeze(2)) <= 0.99).squeeze())
+            print((torch.gather(avail_actions, dim=2,
+                                index=masked_q_values.max(dim=2)[1].unsqueeze(2)) <= 0.99).squeeze())
             print((torch.gather(avail_actions, dim=2, index=picked_actions.unsqueeze(2)) <= 0.99).squeeze())
 
             print('Action Selection Error')
@@ -45,41 +47,104 @@ class EpsilonGreedyActionSelector():
 
         return picked_actions
 
-    def select_pq_values(self, raw_pq, t_env, test_mode=False):
+
+class EpsilonGreedyAttackerActionSelector():
+
+    def __init__(self, args):
+        self.args = args
+
+        self.schedule = DecayThenFlatSchedule(args.epsilon_start, args.epsilon_finish, args.epsilon_anneal_time,
+                                              decay="linear")
+        self.epsilon = self.schedule.eval(0)
+
+    def select_action(self, agent_inputs, t_env, test_mode=False):
+
+        # Assuming agent_inputs is a batch of Q-Values for each agent bav
+        bs = agent_inputs[0].size(0)
         self.epsilon = self.schedule.eval(t_env)
 
         if test_mode:
             # Greedy action selection only
             self.epsilon = 0.0
 
-        random_numbers = torch.rand_like(raw_pq, dtype=torch.float)
-        pick_random = (random_numbers < self.epsilon).long()
-        prob = torch.tensor([0.5, 0.5])
-        random_pq = torch.tensor((Categorical(prob).sample().long(), Categorical(prob).sample().long()))
-        picked_pq = pick_random * random_pq + (1 - pick_random) * raw_pq
-        return picked_pq
+        picked = []
+        for input_q_vals in agent_inputs[:-1]:
+            num_choices = input_q_vals.size(-1)
+            random_numbers = torch.rand_like(input_q_vals[:, :, 0])
+            pick_random = (random_numbers < self.epsilon).long()
+            probs = torch.tensor([1 / num_choices] * num_choices)
+            choices = input_q_vals.max(dim=2)[1]
+            random_actions = Categorical(probs).sample(choices.shape).long()
+            picked_actions = pick_random * random_actions + (1 - pick_random) * choices
+            picked.append(torch.eye(num_choices)[picked_actions])
 
-    def select_individuak_pq_values(self, raw_p, raw_q, t_env, test_mode=False):
-        epsilon = self.schedule.eval(t_env)
+        picked_sigs = []
+        for c_id in range(self.args.n_peers):  # ([bs, max_msg_num, 2])*n_peers
+            num_choices = agent_inputs[-1][c_id].size(-1)  # 2
+            random_numbers = torch.rand_like(agent_inputs[-1][c_id][:, :, 0])
+            pick_random = (random_numbers < self.epsilon).long()
+            probs = torch.tensor([1 / num_choices] * num_choices)
+            choices = agent_inputs[-1][c_id].max(dim=2)[1]
+            random_actions = Categorical(probs).sample(choices.shape).long()
+            picked_actions = pick_random * random_actions + (1 - pick_random) * choices
+            picked_sigs.append(torch.eye(num_choices)[picked_actions])
+
+        picked_sigs = torch.cat(picked_sigs, dim=-1)
+
+        picked.append(list_onehot(picked_sigs, self.args.n_peers))
+        picked = torch.cat(picked, dim=-1)
+        return picked.view(bs, -1)  # [bs, max_num_msg_per_round, msg_space]
+
+
+class EpsilonGreedyIdentifierActionSelector():
+
+    def __init__(self, args):
+        self.args = args
+
+        self.schedule = DecayThenFlatSchedule(args.epsilon_start, args.epsilon_finish, args.epsilon_anneal_time,
+                                              decay="linear")
+        self.epsilon = self.schedule.eval(0)
+
+    def select_action(self, agent_inputs, t_env, test_mode=False):
+        # Assuming agent_inputs is a batch of Q-Values for each agent bav
+        self.epsilon = self.schedule.eval(t_env)
 
         if test_mode:
             # Greedy action selection only
             self.epsilon = 0.0
 
-        random_numbers = torch.rand_like(raw_p, dtype=torch.float)
-        pick_random = (random_numbers < epsilon).long()
-        prob = torch.tensor([0.5, 0.5])
-        random_p = torch.tensor((Categorical(prob).sample().long(), Categorical(prob).sample().long()))
-        print(raw_p.shape)
-        print(random_p.shape)
-        picked_p = pick_random * random_p + (1 - pick_random) * raw_p
+        num_choices = 2
+        random_numbers = torch.rand_like(agent_inputs)
+        pick_random = (random_numbers < self.epsilon).long()
+        probs = torch.tensor([1 / num_choices] * num_choices)
+        random_actions = Categorical(probs).sample(agent_inputs.shape).long()
+        picked_actions = pick_random * random_actions + (1 - pick_random) * agent_inputs.ge(0.5).long()
 
-        random_numbers = torch.rand_like(raw_q, dtype=torch.float)
-        pick_random = (random_numbers < epsilon).long()
-        prob = torch.tensor([0.5, 0.5])
-        random_q = torch.tensor((Categorical(prob).sample().long(), Categorical(prob).sample().long()))
-        picked_q = pick_random * random_q + (1 - pick_random) * raw_q
-        return picked_p, picked_q
+        return picked_actions
 
 
 REGISTRY["epsilon_greedy"] = EpsilonGreedyActionSelector
+
+
+def onehot(x, n):
+    ret = [0] * n
+    if x != float("inf") and 0 <= x < n:
+        ret[x] = 1
+    return ret
+
+
+def rev_onehot(x):
+    for idx in range(len(x)):
+        if x[idx] == 1:
+            return idx
+    return -1
+
+
+def list_onehot(x, n):  # for certificate
+    ret = []
+    for idx in range(n):
+        if idx in x:  # chosen
+            ret.extend([1, 0])
+        else:
+            ret.extend([0, 1])
+    return ret

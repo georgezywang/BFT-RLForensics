@@ -1,5 +1,5 @@
-from controller.shared_controller import BasicMAC
+from controller.separate_controller import SeparateMAC
 
 REGISTRY = {}
 
-REGISTRY["shared"] = BasicMAC
+REGISTRY["separate"] = SeparateMAC
