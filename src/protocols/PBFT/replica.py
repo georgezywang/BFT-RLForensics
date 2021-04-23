@@ -346,10 +346,10 @@ class PBFTagent_wrapper():  # attacker
                 or msg_type == type_dict["NewView"]):
             for sig_id in msg.certificate:
                 is_friend = sig_id in friend_ids
-                is_collected = (msg_type == type_dict["PrepareCertificate"] and sig_id in self.mainlog.get_entry[
-                    msg.seq_num].prepare_sigs) \
-                               or (msg_type == type_dict["CommitCertificate"] and sig_id in self.mainlog.get_entry[
-                    msg.seq_num].commit_sigs)
+                is_collected = (msg_type == type_dict["PrepareCertificate"] and sig_id in self.mainlog.get_entry(
+                    msg.seq_num).prepare_sigs) \
+                               or (msg_type == type_dict["CommitCertificate"] and sig_id in self.mainlog.get_entry(
+                    msg.seq_num).commit_sigs)
                 if not (is_friend or is_collected):
                     flag = False
 
