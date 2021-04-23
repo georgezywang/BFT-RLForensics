@@ -105,6 +105,8 @@ class SeparateLearner:
         pi = th.cat([pi, cert_pi], dim=-1)
         log_attacker_pi = th.log(pi).sum(-1)
 
+        print(q_vals[:, :, 0].shape)
+        print(log_attacker_pi.shape)
         attacker_loss = ((q_vals[:, :, 0].detach() * log_attacker_pi) * mask).sum() / mask.sum()
         self.attacker_optimiser.zero_grad()
         attacker_loss.backward()
