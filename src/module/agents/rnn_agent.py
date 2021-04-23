@@ -51,6 +51,7 @@ class RNNAttackerAgent(nn.Module):
         return self.rnn.init_hidden()
 
     def forward(self, inputs, hidden_state):
+        print("inputs shape: {}".format(inputs.shape))
         x, h = self.rnn(inputs, hidden_state)
         # time to dissemble x
         num_msg_type = 10
@@ -62,7 +63,7 @@ class RNNAttackerAgent(nn.Module):
                                                                                                 self.args.total_client_vals,
                                                                                                 self.args.n_peers,
                                                                                                 self.args.n_peers*2], dim=2)
-        certificates = certificates.split(2, dim=-1)  # ([bs, max_msg_num, 2])*n_peers
+        certificates = list(certificates.split(2, dim=-1))  # make tuple iterable ([bs, max_msg_num, 2])*n_peers
         msg_types = F.softmax(msg_types, dim=-1)
         signer_ids = F.softmax(signer_ids, dim=-1)
         view_nums = F.softmax(view_nums, dim=-1)
