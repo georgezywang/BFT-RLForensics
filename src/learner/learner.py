@@ -74,12 +74,12 @@ class SeparateLearner:
         # print(identifier_actions)
         identifier_actions = identifier_actions.unsqueeze(3).type(th.int64)
         identifier_chosen_action_pi = th.gather(identifier_outs[:, :-1], dim=3, index=identifier_actions).squeeze(3)  # Remove the last dim
-        identifier_mask = mask.clone().repeat(1, 1, self.n_peers)
+        identifier_mask = mask.clone()
         identifier_chosen_action_pi[identifier_mask == 0] = 1
         log_identifier_pi = th.log(identifier_chosen_action_pi).sum(dim=-1)
 
-        print(q_vals[:, :, 1].shape)
-        print( log_identifier_pi.shape)
+        # print(q_vals[:, :, 1].shape)
+        # print( log_identifier_pi.shape)
         identifier_loss = ((q_vals[:, :, 1].detach() * log_identifier_pi) * identifier_mask).sum() / identifier_mask.sum()
         self.identifier_optimiser.zero_grad()
         identifier_loss.backward()
