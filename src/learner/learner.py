@@ -207,7 +207,7 @@ class SeparateLearner:
                         parsed_actions_t_msg.append(parsed_actions[bs_idx][t_idx][msg_idx][idx])
                     parsed_actions_t.append(parsed_actions_t_msg)
                 parsed_actions_idx.append(parsed_actions_t)
-            ret.append(th.tensor(parsed_actions_idx, dtype=th.long))
+            ret.append(th.tensor(parsed_actions_idx, dtype=th.int64))
             # ret.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
 
         ret_cert = []
@@ -221,7 +221,7 @@ class SeparateLearner:
                         parsed_actions_t_msg.append(parsed_actions[bs_idx][t_idx][msg_idx][-1][idx])
                     parsed_actions_t.append(parsed_actions_t_msg)
                 parsed_actions_idx.append(parsed_actions_t)
-            ret_cert.append(th.tensor(parsed_actions_idx, dtype=th.long))
+            ret_cert.append(th.tensor(parsed_actions_idx, dtype=th.int64))
             # ret_cert.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
 
         ret.append(ret_cert)
