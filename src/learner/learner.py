@@ -186,7 +186,8 @@ class SeparateLearner:
         bs = actions.size(0)
         t_len = actions.size(1)
         total_msgs_num = self.args.num_malicious * self.args.max_message_num_per_round
-        actions = actions.view(bs, total_msgs_num, -1)
+        print("actions_shape: {}".format(actions.shape))
+        # actions = actions.view(bs, t_len, total_msgs_num, -1)
         parsed_actions = []
         for bs_idx in range(bs):
             parsed_actions_t = []
