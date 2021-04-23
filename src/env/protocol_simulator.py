@@ -216,9 +216,9 @@ class ProtocolSimulator(MultiAgentEnv):
             for msg in self.replica_static_msg_buffers[r_id]:
                 obs.extend(self._replica_msg_to_malicious_input(msg))
             num_decoy_msg = self.max_messages_per_round - len(self.replica_static_msg_buffers[r_id])
-            obs.extend(self._decoy_msgs(num_decoy_msg))
+            obs.extend(self._decoy_msgs(num_decoy_msg, malicious=True))
             idx += 1
-        print("len of attacker_obs: {}".format(len(obs)))
+        # print("len of attacker_obs: {}".format(len(obs)))
         return obs
 
     def get_identifier_obs(self):
@@ -263,7 +263,7 @@ class ProtocolSimulator(MultiAgentEnv):
                         len(client_vals) + self.n_malicious + self.args.n_peers * 2
         malicious_ids = self.n_malicious * self.n_malicious
         obs_size = int(self.args.max_message_num_per_round * msg_obs_space * self.args.num_malicious + malicious_ids)
-        print("attacker_obs_size: {}, msg_obs_space: {}".format(obs_size, msg_obs_space))
+        # print("attacker_obs_size: {}, msg_obs_space: {}".format(obs_size, msg_obs_space))
         return obs_size
 
     def get_identifier_obs_size(self):
@@ -338,7 +338,7 @@ class ProtocolSimulator(MultiAgentEnv):
         else:
             zeros = [0] * self.args.n_peers * 2
             inputs.extend(zeros)
-        print("msg_len in actual attacker obs: {}".format(len(inputs)))
+        # print("msg_len in actual attacker obs: {}".format(len(inputs)))
         return inputs
 
     def _replica_msg_to_input(self, msg):
@@ -365,11 +365,11 @@ class ProtocolSimulator(MultiAgentEnv):
             inputs.extend(zeros)
         return inputs
 
-    def _decoy_msgs(self, num):
+    def _decoy_msgs(self, num, malicious=False):
         num_msg_type = 11
-        msg_obs_space = int(num_msg_type + self.args.max_view_num + \
-                            self.args.max_seq_num + self.args.n_peers + \
-                            len(client_vals) + self.args.n_peers + self.args.n_peers * 2)
+        msg_obs_space = int(num_msg_type + self.args.max_view_num +
+                            self.args.max_seq_num + len(client_vals) + self.args.n_peers + self.args.n_peers * 2)
+        msg_obs_space += self.n_malicious if malicious else self.args.n_peers
         return [0] * msg_obs_space * num
 
     def _malicious_id_idx(self, r_id):
