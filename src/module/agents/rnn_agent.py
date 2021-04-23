@@ -36,7 +36,7 @@ class RNNIdentifierAgent(nn.Module):
 
     def forward(self, inputs, hidden_state):
         x, h = self.rnn(inputs, hidden_state)
-        x = x.normalize(dim=-1)  # normalize to range [0, 1]
+        x = F.normalize(x, dim=-1)  # normalize to range [0, 1]
         return x, h
 
 
