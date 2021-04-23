@@ -71,14 +71,14 @@ class SeparateLearner:
         # (bs,t,n,n_actions), Q values of n_actions
 
         # Pick the Q-Values for the actions taken by each agent
-        print(identifier_actions)
+        # print(identifier_actions)
         identifier_actions = identifier_actions.unsqueeze(3).type(th.int64)
         identifier_chosen_action_pi = th.gather(identifier_outs[:, :-1], dim=3, index=identifier_actions).squeeze(3)  # Remove the last dim
         identifier_mask = mask.clone().repeat(1, 1, self.n_peers)
         identifier_chosen_action_pi[identifier_mask == 0] = 1
         log_identifier_chosen_action_pi = th.log(identifier_chosen_action_pi).sum(dim=-1)
 
-        identifier_loss = ((q_vals[:, :, 1].reshape(-1, 1).detach() * log_identifier_chosen_action_pi).reshape(-1, 1) * mask).sum() / mask.sum()
+        identifier_loss = ((q_vals[:, :, 1].detach() * log_identifier_chosen_action_pi) * identifier_mask).sum() / identifier_mask.sum()
         self.identifier_optimiser.zero_grad()
         identifier_loss.backward()
         identifier_grad_norm = th.nn.utils.clip_grad_norm_(self.identifier_params, self.args.grad_norm_clip)
@@ -103,9 +103,9 @@ class SeparateLearner:
             cert_pi.append(out)
         cert_pi = th.cat(cert_pi, dim=-1)
         pi = th.cat([pi, cert_pi], dim=-1)
-        log_attacker_pi = th.log(pi).sum(-1).reshape(-1, 1)
+        log_attacker_pi = th.log(pi).sum(-1)
 
-        attacker_loss = ((q_vals[:, :, 0].reshape(-1, 1).detach() * log_attacker_pi) * mask).sum() / mask.sum()
+        attacker_loss = ((q_vals[:, :, 0].detach() * log_attacker_pi) * mask).sum() / mask.sum()
         self.attacker_optimiser.zero_grad()
         attacker_loss.backward()
         attacker_grad_norm = th.nn.utils.clip_grad_norm_(self.attacker_params, self.args.grad_norm_clip)
@@ -183,7 +183,7 @@ class SeparateLearner:
         bs = actions.size(0)
         t_len = actions.size(1)
         total_msgs_num = self.args.num_malicious * self.args.max_message_num_per_round
-        print("actions_shape: {}".format(actions.shape))
+        # print("actions_shape: {}".format(actions.shape))
         actions = actions.reshape(bs, t_len, total_msgs_num, -1)
         parsed_actions = []
         for bs_idx in range(bs):
