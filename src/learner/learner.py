@@ -72,6 +72,7 @@ class SeparateLearner:
 
         # Pick the Q-Values for the actions taken by each agent
         print(identifier_outs[:, :-1].shape)
+        identifier_actions = identifier_actions.unsqueeze(3)
         identifier_chosen_action_pi = th.gather(identifier_outs[:, :-1], dim=3, index=identifier_actions).squeeze(3)  # Remove the last dim
         identifier_mask = mask.clone().repeat(1, 1, self.n_peers)
         identifier_chosen_action_pi[identifier_mask == 0] = 1
@@ -89,7 +90,7 @@ class SeparateLearner:
         pi = []
         for idx in range(num_action_types-1):
             out = th.stack([attacker_outs[t][idx] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, num_action]
-            out = th.gather(out[:, :-1], dim=3, index=attacker_actions[idx]).squeeze(3)
+            out = th.gather(out[:, :-1], dim=3, index=attacker_actions[idx].unsqueeze(3)).squeeze(3)
             out[attacker_mask == 0] = 1
             pi.append(out)
         pi = th.cat(pi, dim=-1)
@@ -97,7 +98,7 @@ class SeparateLearner:
         cert_pi = []
         for r_id in range(self.n_peers):  # ([bs, max_msg_num, 2])*n_peers
             out = th.stack([attacker_outs[t][-1][r_id] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, 2]
-            out = th.gather(out[:, :-1], dim=3, index=attacker_actions[-1][:, :, :, r_id]).squeeze(3)
+            out = th.gather(out[:, :-1], dim=3, index=attacker_actions[-1][:, :, :, r_id].unsqueeze(3)).squeeze(3)
             out[attacker_mask == 0] = 1
             cert_pi.append(out)
         cert_pi = th.cat(cert_pi, dim=-1)
