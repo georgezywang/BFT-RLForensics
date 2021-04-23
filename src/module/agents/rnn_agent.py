@@ -77,6 +77,6 @@ class RNNAttackerAgent(nn.Module):
     def _get_msg_shape(self):  # TODO: move this to env_info[]
         num_msg_type = 10  # no client type, 9 is no-op
         msg_action_space = num_msg_type + self.args.num_malicious + \
-                           self.args.episode_limit / 4 + self.args.episode_limit / 4 + \
+                           self.args.max_seq_num + self.args.max_view_num + \
                            self.args.total_client_vals + self.args.n_peers + self.args.n_peers*2
         return int(msg_action_space)
