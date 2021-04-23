@@ -58,7 +58,7 @@ class EpisodeBatch:
         })
 
         for field_key, field_info in scheme.items():
-            print("field key: {}, field_info: {}".format(field_key, field_info))
+            # print("field key: {}, field_info: {}".format(field_key, field_info))
             assert "vshape" in field_info, "Scheme must define vshape for {}".format(field_key)
             vshape = field_info["vshape"]
             episode_const = field_info.get("episode_const", False)
