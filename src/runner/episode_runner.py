@@ -76,7 +76,7 @@ class EpisodeRunner:
 
             print(attacker_actions[0])
             print(identifier_actions[0])
-            reward s, terminated, env_info = self.env.step(attacker_actions[0], identifier_actions[0])
+            rewards, terminated, env_info = self.env.step(attacker_actions[0], identifier_actions[0])
 
             attacker_episode_return += rewards[0]
             identifier_episode_return += rewards[1]
