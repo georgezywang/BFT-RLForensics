@@ -127,7 +127,7 @@ class SeparateLearner:
     def _train_critic(self, batch, rewards, terminated, mask):
         # Optimise critic
         rewards = th.cat(rewards, dim=-1).detach()  # [bs, t, 2]
-        
+
         target_critic_outs = []
         target_critic_hidden = self.target_critic.init_hidden().expand(batch.batch_size, -1)
         for t in range(batch.max_seq_length):
@@ -166,7 +166,7 @@ class SeparateLearner:
             # Normal L2 loss, take mean over actual data
             loss = (masked_td_error ** 2).sum() / mask_t.sum()
             self.critic_optimiser.zero_grad()
-            loss.backward()
+            loss.backward(retain_graph=True)
 
             grad_norm = th.nn.utils.clip_grad_norm_(self.critic_params, self.args.grad_norm_clip)
             self.critic_optimiser.step()
