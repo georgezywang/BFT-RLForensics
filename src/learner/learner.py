@@ -198,10 +198,19 @@ class SeparateLearner:
                 parsed_actions_t.append(parsed_actions_t_msg)
             parsed_actions.append(parsed_actions_t)
 
-        num_action_types = len(parsed_actions[0][0][0])
+        num_action_types = len(parsed_actions[0][0][0])  # so bad
         ret = []
         for idx in range(num_action_types-1):
-            ret.append(th.tensor(parsed_actions[:, :, :, idx], dtype=th.long))
+            parsed_actions = []
+            for bs_idx in range(bs):
+                parsed_actions_t = []
+                for t_idx in range(t_len):
+                    parsed_actions_t_msg = []
+                    for msg_idx in range(total_msgs_num):
+                        parsed_actions_t_msg.append(parsed_actions[:, :, :, idx])
+                    parsed_actions_t.append(parsed_actions_t_msg)
+                parsed_actions.append(parsed_actions_t)
+            ret.append(th.tensor(parsed_actions, dtype=th.long))
 
         ret_cert = []
         for idx in range(self.n_peers):
