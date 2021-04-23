@@ -36,7 +36,7 @@ critic_lr: 0.0005 # Learning rate for critics
 optim_alpha: 0.99 # RMSProp alpha
 optim_eps: 0.00001 # RMSProp epsilon
 grad_norm_clip: 10 # Reduce magnitude of gradients above this L2 norm
-
+td_lambda: 0.8
 # --- Agent parameters ---
 # all prefixed in code
 
