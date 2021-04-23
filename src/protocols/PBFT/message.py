@@ -73,7 +73,7 @@ class ClientMsg(PBFTMessage):
 class CertificateMsg(PBFTMessage):
     def __init__(self, args, view_num, seq_num, signer_id, val, receiver_id, certificate, msg_type):
         super().__init__(args, msg_type, view_num, seq_num, signer_id, val, receiver_id)
-        self.cert = certificate
+        self.certificate = certificate
 
 
 class ViewChangeMsg(PBFTMessage):
