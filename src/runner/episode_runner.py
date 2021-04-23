@@ -77,14 +77,14 @@ class EpisodeRunner:
             actions = (attacker_actions[0], identifier_actions[0])
             rewards, terminated, env_info = self.env.step(actions)
 
-            attacker_episode_return += rewards[0][0]
-            identifier_episode_return += rewards[1][0]
+            attacker_episode_return += rewards[0]
+            identifier_episode_return += rewards[1]
 
             post_transition_data = {
                 "attacker_action": attacker_actions,
                 "identifier_action": identifier_actions,
-                "attacker_reward": rewards[0],
-                "identifier_reward": rewards[1],
+                "attacker_reward": [(rewards[0],)],
+                "identifier_reward": [(rewards[1],)],
                 "terminated": [(terminated,)],
             }
 

@@ -151,7 +151,7 @@ class ProtocolSimulator(MultiAgentEnv):
             self._create_new_client_request()
 
         self._check_identifier_correctness(identifier_choices)
-        rewards = [[self.attacker_reward], [self.identifier_reward]]
+        rewards = [self.attacker_reward, self.identifier_reward]
 
         if self.args.terminate_after_consensus_breached:
             terminated = (status == consensus_status["violated"] or self.round_counter > self.args.episode_limit
