@@ -268,7 +268,7 @@ class SeparateLearner:
 
     def _update_targets(self):
         self.target_mac.load_state(self.mac)
-        self.target_critic.load_state(self.critic)
+        self.target_critic.load_state_dict(self.critic.state_dict())
         self.logger.console_logger.info("Updated target network")
 
     def cuda(self):
