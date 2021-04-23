@@ -171,8 +171,8 @@ class SeparateLearner:
         running_log["critic_grad_norm"].append(grad_norm)
         mask_elems = mask_t.sum().item()
         running_log["td_error_abs"].append((masked_td_error.abs().sum().item() / mask_elems))
-        running_log["q_taken_mean"].append((q_vals[:, t] * mask_t).sum().item() / mask_elems)
-        running_log["target_mean"].append((targets[:, t] * mask_t).sum().item() / mask_elems)
+        running_log["q_taken_mean"].append((q_vals * mask_t).sum().item() / mask_elems)
+        running_log["target_mean"].append((targets * mask_t).sum().item() / mask_elems)
 
         return q_vals, running_log
 
@@ -205,7 +205,8 @@ class SeparateLearner:
                         parsed_actions_t_msg.append(parsed_actions[bs_idx][t_idx][msg_idx][idx])
                     parsed_actions_t.append(parsed_actions_t_msg)
                 parsed_actions_idx.append(parsed_actions_t)
-            ret.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
+            ret.append(th.tensor(parsed_actions_idx, dtype=th.long))
+            # ret.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
 
         ret_cert = []
         for idx in range(self.n_peers):
@@ -218,7 +219,8 @@ class SeparateLearner:
                         parsed_actions_t_msg.append(parsed_actions[bs_idx][t_idx][msg_idx][-1][idx])
                     parsed_actions_t.append(parsed_actions_t_msg)
                 parsed_actions_idx.append(parsed_actions_t)
-            ret_cert.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
+            ret_cert.append(th.tensor(parsed_actions_idx, dtype=th.long))
+            # ret_cert.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
 
         ret.append(ret_cert)
         return ret
