@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d609e81d-e11f-41d4-b424-787c505a44d8" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/action_selectors.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/action_selectors.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -72,10 +73,10 @@
       <screen x="0" y="0" width="1536" height="864" />
     </state>
     <state x="277" y="77" key="SettingsEditor/0.0.1536.864@0.0.1536.864" timestamp="1617873209461" />
-    <state x="431" y="181" width="672" height="678" key="search.everywhere.popup" timestamp="1619113533600">
+    <state x="431" y="181" width="672" height="678" key="search.everywhere.popup" timestamp="1619165195449">
       <screen x="0" y="0" width="1536" height="864" />
     </state>
-    <state x="431" y="181" width="672" height="678" key="search.everywhere.popup/0.0.1536.864@0.0.1536.864" timestamp="1619113533600" />
+    <state x="431" y="181" width="672" height="678" key="search.everywhere.popup/0.0.1536.864@0.0.1536.864" timestamp="1619165195449" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
