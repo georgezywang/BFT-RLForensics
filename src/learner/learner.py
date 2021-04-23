@@ -21,6 +21,7 @@ class SeparateLearner:
         self.critic = Critic(scheme, args)
 
         self.last_target_update_step = 0
+        self.last_target_update_episode = 0
         self.critic_training_steps = 0
 
         self.identifier_params = list(mac.identifier_parameters())
