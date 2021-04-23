@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d609e81d-e11f-41d4-b424-787c505a44d8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/env/protocol_simulator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/env/protocol_simulator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/protocols/PBFT/log.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/protocols/PBFT/log.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/protocols/PBFT/replica.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/protocols/PBFT/replica.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/algs/nash_q_learning.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/algs/nash_q_learning.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
