@@ -126,8 +126,8 @@ class SeparateLearner:
 
     def _train_critic(self, batch, rewards, terminated, mask):
         # Optimise critic
-        rewards = th.cat(rewards, dim=-1)  # [bs, t, 2]
-
+        rewards = th.cat(rewards, dim=-1).detach()  # [bs, t, 2]
+        
         target_critic_outs = []
         target_critic_hidden = self.target_critic.init_hidden().expand(batch.batch_size, -1)
         for t in range(batch.max_seq_length):
