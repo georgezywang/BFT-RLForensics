@@ -140,22 +140,8 @@ class SeparateLearner:
         # print("target shape： {}".format(targets.shape))
 
         q_vals = th.zeros_like(target_critic_outs)[:, :-1]  # [bs, t-1, 2]
-
-        running_log = {
-            "critic_loss": [],
-            "critic_grad_norm": [],
-            "td_error_abs": [],
-            "target_mean": [],
-            "q_taken_mean": [],
-        }
-
         critic_hidden = self.critic.init_hidden().expand(batch.batch_size, -1)
         for t in reversed(range(rewards.size(1))):
-
-            print("mask_t shape： {}".format(mask_t.shape))
-            if mask_t.sum() == 0:
-                continue
-
             q_t, critic_hidden = self.critic(batch, critic_hidden, t)
             q_vals[:, t] = q_t
 
@@ -172,6 +158,14 @@ class SeparateLearner:
         grad_norm = th.nn.utils.clip_grad_norm_(self.critic_params, self.args.grad_norm_clip)
         self.critic_optimiser.step()
         self.critic_training_steps += 1
+
+        running_log = {
+            "critic_loss": [],
+            "critic_grad_norm": [],
+            "td_error_abs": [],
+            "target_mean": [],
+            "q_taken_mean": [],
+        }
 
         running_log["critic_loss"].append(loss.item())
         running_log["critic_grad_norm"].append(grad_norm)
