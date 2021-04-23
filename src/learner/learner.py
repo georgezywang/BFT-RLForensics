@@ -151,7 +151,7 @@ class SeparateLearner:
 
         critic_hidden = self.critic.init_hidden().expand(batch.batch_size, -1)
         for t in reversed(range(rewards.size(1))):
-            mask_t = mask[:, t].expand(-1, self.n_agents)
+
             print("mask_t shape： {}".format(mask_t.shape))
             if mask_t.sum() == 0:
                 continue
@@ -159,26 +159,26 @@ class SeparateLearner:
             q_t, critic_hidden = self.critic(batch, critic_hidden, t)
             q_vals[:, t] = q_t
 
-            td_error = (q_vals[:, t] - targets[:, t])
+        td_error = (q_vals - targets)
+        mask_t = mask.expand(-1, -1, self.n_agents)
+        # 0-out the targets that came from padded data
+        masked_td_error = td_error * mask_t
 
-            # 0-out the targets that came from padded data
-            masked_td_error = td_error * mask_t
+        # Normal L2 loss, take mean over actual data
+        loss = (masked_td_error ** 2).sum() / mask_t.sum()
+        self.critic_optimiser.zero_grad()
+        loss.backward()
 
-            # Normal L2 loss, take mean over actual data
-            loss = (masked_td_error ** 2).sum() / mask_t.sum()
-            self.critic_optimiser.zero_grad()
-            loss.backward()
+        grad_norm = th.nn.utils.clip_grad_norm_(self.critic_params, self.args.grad_norm_clip)
+        self.critic_optimiser.step()
+        self.critic_training_steps += 1
 
-            grad_norm = th.nn.utils.clip_grad_norm_(self.critic_params, self.args.grad_norm_clip)
-            self.critic_optimiser.step()
-            self.critic_training_steps += 1
-
-            running_log["critic_loss"].append(loss.item())
-            running_log["critic_grad_norm"].append(grad_norm)
-            mask_elems = mask_t.sum().item()
-            running_log["td_error_abs"].append((masked_td_error.abs().sum().item() / mask_elems))
-            running_log["q_taken_mean"].append((q_vals[:, t] * mask_t).sum().item() / mask_elems)
-            running_log["target_mean"].append((targets[:, t] * mask_t).sum().item() / mask_elems)
+        running_log["critic_loss"].append(loss.item())
+        running_log["critic_grad_norm"].append(grad_norm)
+        mask_elems = mask_t.sum().item()
+        running_log["td_error_abs"].append((masked_td_error.abs().sum().item() / mask_elems))
+        running_log["q_taken_mean"].append((q_vals[:, t] * mask_t).sum().item() / mask_elems)
+        running_log["target_mean"].append((targets[:, t] * mask_t).sum().item() / mask_elems)
 
         return q_vals, running_log
 
