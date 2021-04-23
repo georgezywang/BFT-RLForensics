@@ -137,6 +137,7 @@ class SeparateLearner:
 
         # Calculate td-lambda targets
         targets = build_td_lambda_targets(rewards, terminated, mask, target_critic_outs, self.n_agents, self.args.gamma, self.args.td_lambda)
+        print("target shape： {}".format(targets.shape))
 
         q_vals = th.zeros_like(target_critic_outs)[:, :-1]  # [bs, t-1, 2]
 
@@ -151,6 +152,7 @@ class SeparateLearner:
         critic_hidden = self.critic.init_hidden().expand(batch.batch_size, -1)
         for t in reversed(range(rewards.size(1))):
             mask_t = mask[:, t].expand(-1, self.n_agents)
+            print("mask_t shape： {}".format(mask_t.shape))
             if mask_t.sum() == 0:
                 continue
 

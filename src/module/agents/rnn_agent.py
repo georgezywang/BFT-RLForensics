@@ -22,8 +22,8 @@ class RNNAgent(nn.Module):
         h = self.rnn(x, h_in)
         # h = F.relu(self.fc3(h))
         q = self.fc2(h)
-        print("q shape: {}".format(q.shape))
-        print("h shape: {}".format(h.shape))
+        # print("q shape: {}".format(q.shape))
+        # print("h shape: {}".format(h.shape))
         return q, h
 
 
