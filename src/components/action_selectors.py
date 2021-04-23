@@ -91,7 +91,7 @@ class EpsilonGreedyAttackerActionSelector():
 
         picked_sigs = torch.cat(picked_sigs, dim=-1)
 
-        picked.append(torch.tensor(list_onehot(picked_sigs, self.args.n_peers)))
+        picked.append(picked_sigs)
         print("picked action: {}".format([x.shape for x in picked]))
         picked = torch.cat(picked, dim=-1)
         return picked.view(bs, -1)  # [bs, max_num_msg_per_round, msg_space]
