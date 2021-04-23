@@ -64,8 +64,8 @@ class SeparateMAC:
             return attacker_outs, identifier_outs
 
     def init_hidden(self, batch_size):
-        self.attacker_hidden_states = self.attacker.init_hidden().unsqueeze(0).expand(batch_size, -1)  # bav
-        self.identifier_hidden_states = self.identifier.init_hidden().unsqueeze(0).expand(batch_size, -1)
+        self.attacker_hidden_states = self.attacker.init_hidden().expand(batch_size, -1)  # bav
+        self.identifier_hidden_states = self.identifier.init_hidden().expand(batch_size, -1)
 
     def attacker_parameters(self):
         return list(self.attacker.parameters())
