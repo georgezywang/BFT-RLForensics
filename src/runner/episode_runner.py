@@ -121,8 +121,8 @@ class EpisodeRunner:
             self._log(attacker_cur_returns, identifier_cur_returns, cur_stats, log_prefix)
         elif self.t_env - self.log_train_stats_t >= self.args.runner_log_interval:
             self._log(attacker_cur_returns, identifier_cur_returns, cur_stats, log_prefix)
-            if hasattr(self.mac.action_selector, "epsilon"):
-                self.logger.log_stat("epsilon", self.mac.action_selector.epsilon, self.t_env)
+            # if hasattr(self.mac.action_selector, "epsilon"):
+            #     self.logger.log_stat("epsilon", self.mac.action_selector.epsilon, self.t_env)
             self.log_train_stats_t = self.t_env
 
         return self.batch
