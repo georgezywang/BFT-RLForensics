@@ -95,11 +95,10 @@ class SeparateLearner:
             pi.append(out)
         pi = th.cat(pi, dim=-1)
 
-        print(attacker_actions[-1])
         cert_pi = []
         for r_id in range(self.n_peers):  # ([bs, max_msg_num, 2])*n_peers
             out = th.stack([attacker_outs[t][-1][r_id] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, 2]
-            out = th.gather(out[:, :-1], dim=3, index=attacker_actions[-1][:, :, :, r_id].unsqueeze(3)).squeeze(3)
+            out = th.gather(out[:, :-1], dim=3, index=attacker_actions[-1][r_id].unsqueeze(3)).squeeze(3)
             out[attacker_mask == 0] = 1
             cert_pi.append(out)
         cert_pi = th.cat(cert_pi, dim=-1)
