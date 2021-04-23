@@ -129,14 +129,11 @@ class EpisodeRunner:
 
     def _log(self, attacker_returns, identifier_returns, stats, prefix):
 
-        self.logger.log_stat(prefix + "attacker agent return_mean {} and std {}".format(np.mean(attacker_returns),
-                                                                                        np.std(attacker_returns),
-                                                                                        self.t_env))
+        self.logger.log_stat(prefix + "attacker agent return mean ", np.mean(attacker_returns), self.t_env)
+        self.logger.log_stat(prefix + "attacker agent return std ", np.std(attacker_returns), self.t_env)
         attacker_returns.clear()
-
-        self.logger.log_stat(prefix + "identifier agent return_mean {} and std {}".format(np.mean(identifier_returns),
-                                                                                          np.std(identifier_returns),
-                                                                                          self.t_env))
+        self.logger.log_stat(prefix + "identifier agent return mean ", np.mean(identifier_returns), self.t_env)
+        self.logger.log_stat(prefix + "identifier agent return std ", np.std(identifier_returns), self.t_env)
         identifier_returns.clear()
 
         for k, v in stats.items():
