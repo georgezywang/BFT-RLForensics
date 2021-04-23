@@ -72,7 +72,7 @@ class SeparateLearner:
 
         # Pick the Q-Values for the actions taken by each agent
         print(identifier_outs[:, :-1].shape)
-        identifier_actions = identifier_actions.unsqueeze(3)
+        identifier_actions = identifier_actions.unsqueeze(3).int()
         identifier_chosen_action_pi = th.gather(identifier_outs[:, :-1], dim=3, index=identifier_actions).squeeze(3)  # Remove the last dim
         identifier_mask = mask.clone().repeat(1, 1, self.n_peers)
         identifier_chosen_action_pi[identifier_mask == 0] = 1
