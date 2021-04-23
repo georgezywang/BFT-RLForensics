@@ -136,7 +136,7 @@ class SeparateLearner:
         target_critic_outs = th.stack(target_critic_outs, dim=1)  # [bs, t, 2]
 
         # Calculate td-lambda targets
-        targets = build_td_lambda_targets(rewards, terminated, mask, target_critic_outs, self.n_agents, self.args.gamma, self.args.td_lambda)
+        targets = build_td_lambda_targets(rewards, terminated, mask, target_critic_outs, self.n_agents, self.args.gamma, self.args.td_lambda).detach()
         # print("target shape： {}".format(targets.shape))
 
         q_vals = th.zeros_like(target_critic_outs)[:, :-1]  # [bs, t-1, 2]
@@ -158,9 +158,8 @@ class SeparateLearner:
 
             q_t, critic_hidden = self.critic(batch, critic_hidden, t)
             q_vals[:, t] = q_t
-            targets_t = targets[:, t]
 
-            td_error = (q_t - targets_t.detach())
+            td_error = (q_vals[:, t] - targets[:, t])
 
             # 0-out the targets that came from padded data
             masked_td_error = td_error * mask_t
@@ -168,7 +167,7 @@ class SeparateLearner:
             # Normal L2 loss, take mean over actual data
             loss = (masked_td_error ** 2).sum() / mask_t.sum()
             self.critic_optimiser.zero_grad()
-            loss.backward(retain_graph=True)
+            loss.backward()
 
             grad_norm = th.nn.utils.clip_grad_norm_(self.critic_params, self.args.grad_norm_clip)
             self.critic_optimiser.step()
