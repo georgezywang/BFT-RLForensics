@@ -436,7 +436,7 @@ def list_onehot(x, n):  # for certificate
 
 def rev_list_onehot(x):  # for certificates
     ret = []
-    for idx in range(len(x) / 2):
+    for idx in range(len(x) // 2):
         if x[2 * idx] == 1:  # chosen
             ret.append(idx)
     return ret

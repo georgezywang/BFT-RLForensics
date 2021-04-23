@@ -77,7 +77,7 @@ class EpsilonGreedyAttackerActionSelector():
             random_actions = Categorical(probs).sample(choices.shape).long()
             picked_actions = pick_random * random_actions + (1 - pick_random) * choices
             picked.append(torch.eye(num_choices)[picked_actions])
-            print(num_choices)
+            # print(num_choices)
 
         picked_sigs = []
         for c_id in range(self.args.n_peers):  # ([bs, max_msg_num, 2])*n_peers
@@ -95,7 +95,7 @@ class EpsilonGreedyAttackerActionSelector():
         picked.append(picked_sigs)
         # print("picked action: {}".format([x.shape for x in picked]))
         picked = torch.cat(picked, dim=-1)
-        print("action shape: {}".format(picked.shape))
+        # print("action shape: {}".format(picked.shape))
         return picked.view(bs, -1)  # [bs, max_num_msg_per_round, msg_space]
 
 
