@@ -51,7 +51,7 @@ class RNNAttackerAgent(nn.Module):
         return self.rnn.init_hidden()
 
     def forward(self, inputs, hidden_state):
-        print("inputs shape: {}".format(inputs.shape))
+        # print("inputs shape: {}".format(inputs.shape))
         x, h = self.rnn(inputs, hidden_state)
         # time to dissemble x
         num_msg_type = 10

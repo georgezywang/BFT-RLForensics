@@ -12,7 +12,11 @@ type_dict = {"PrePrepare": 0,
 
 
 def create_message(args, params):
-    msg_type = params["msg_type"]
+    if isinstance(params["msg_type"], int):
+        inv_dict = {v: k for k, v in type_dict.items()}
+        msg_type = inv_dict[params["msg_type"]]
+    else:
+        msg_type = params["msg_type"]
     if msg_type == "Client":
         return ClientMsg(args=args,
                          view_num=params["view_num"],
