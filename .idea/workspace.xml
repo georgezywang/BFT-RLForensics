@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d609e81d-e11f-41d4-b424-787c505a44d8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/src/components/action_selectors.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/action_selectors.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/runner/episode_runner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/runner/episode_runner.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
