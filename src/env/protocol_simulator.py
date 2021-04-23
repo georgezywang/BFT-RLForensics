@@ -154,7 +154,7 @@ class ProtocolSimulator(MultiAgentEnv):
         rewards = [self.attacker_reward, self.identifier_reward]
 
         if self.args.terminate_after_consensus_breached:
-            terminated = (status == consensus_status["violated"] or self.round_counter > self.args.episode_limit
+            terminated = (status == consensus_status["violated"] or self.round_counter >= self.args.episode_limit
                           or self.client_request_seq_num > self.args.max_seq_num)
 
         env_info = {}
