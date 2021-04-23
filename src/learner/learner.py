@@ -259,7 +259,8 @@ class SeparateLearner:
 
     def save_models(self, path):
         self.mac.save_models(path)
-        self.critic.save_models(path)
+        th.save(self.critic.state_dict(), "{}/critic.th".format(path))
+        th.save(self.target_critic.state_dict(), "{}/tar_critic.th".format(path))
         th.save(self.identifier_optimiser.state_dict(), "{}/identifier_critic_opt.th".format(path))
         th.save(self.critic_optimiser.state_dict(), "{}/critic_opt.th".format(path))
         th.save(self.attacker_optimiser.state_dict(), "{}/attacker_opt.th".format(path))
@@ -268,6 +269,8 @@ class SeparateLearner:
         self.mac.load_models(path)
         # Not quite right but I don't want to save target networks
         self.target_mac.load_models(path)
+        self.critic.load_state_dict(th.load("{}/critic.th".format(path), map_location=lambda storage, loc: storage))
+        self.target_critic.load_state_dict(th.load("{}/tar_critic.th".format(path), map_location=lambda storage, loc: storage))
         self.identifier_optimiser.load_state_dict(th.load("{}/identifier_opt.th".format(path), map_location=lambda storage, loc: storage))
         self.attacker_optimiser.load_state_dict(th.load("{}/attacker_opt.th".format(path), map_location=lambda storage, loc: storage))
         self.critic_optimiser.load_state_dict(th.load("{}/critic_opt.th".format(path), map_location=lambda storage, loc: storage))
@@ -275,7 +278,7 @@ class SeparateLearner:
 
 def list_rev_onehot(x):  # for certificates
     ret = []
-    for idx in range(len(x)/2):
+    for idx in range(len(x)//2):
         if x[2*idx] == 1:  # chosen
             ret.append(1)
         else:
