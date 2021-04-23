@@ -47,15 +47,15 @@ class Entry():
             print("Sequence number of message and log not matching, ignored (Message {}, Log entry {})".format(
                 msg.seq_num, self.seq_num))
             return
-        if msg.type == type_dict["PrePrepare"]:
+        if msg.msg_type == type_dict["PrePrepare"]:
             return self._add_preprepare(msg)
-        if msg.type == type_dict["Prepare"]:
+        if msg.msg_type == type_dict["Prepare"]:
             return self._add_prepare(msg)
-        if msg.type == type_dict["Commit"]:
+        if msg.msg_type == type_dict["Commit"]:
             return self._add_commit(msg)
-        if msg.type == type_dict["PrepareCertificate"]:
+        if msg.msg_type == type_dict["PrepareCertificate"]:
             return self._add_prepare_cert(msg)
-        if msg.type == type_dict["CommitCertificate"]:
+        if msg.msg_type == type_dict["CommitCertificate"]:
             return self._add_commit_cert(msg)
 
     def is_preprepare_ready(self):
@@ -111,7 +111,7 @@ class ViewEntry():
             print("Sequence number of message and log not matching, ignored (Message {}, Log entry {})".format(
                 msg.view_num, self.view_num))
             return
-        if msg.type != type_dict["ViewChange"]:
+        if msg.msg_type != type_dict["ViewChange"]:
             print("Message type in ViewChange, NewView, Seal, or SealRequest, ignored")
             return
         self._add_view_change(msg)
@@ -147,7 +147,7 @@ class ConsensusEntry():
     def add_message(self, msg):
         if msg.seq_num != self.seq_num:
             return
-        if msg.type != type_dict["BlockCommit"]:
+        if msg.msg_type != type_dict["BlockCommit"]:
             print("Message type in ViewChange, NewView, Seal, or SealRequest, ignored")
             return
         self._add_block_commit(msg)
