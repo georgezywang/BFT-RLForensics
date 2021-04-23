@@ -61,7 +61,7 @@ class SeparateLearner:
         identifier_outs = []
         self.mac.init_hidden(bs)
         for t in range(batch.max_seq_length):
-            attacker_out, identifier_out = self.mac.forward(batch, t=t)  # (bs,n,n_actions)
+            attacker_out, identifier_out = self.mac.forward(batch, t=t, test_mode=False)  # (bs,n,n_actions)
             attacker_outs.append(attacker_out)  # [t,(bs,n_peers)]
             identifier_outs.append(identifier_out)
 

@@ -20,7 +20,7 @@ from runner import REGISTRY as r_REGISTRY
 from controller import REGISTRY as mac_REGISTRY
 from components.episode_buffer import ReplayBuffer
 from components.transforms import OneHot
-torch.autograd.set_detect_anomaly(True)
+# torch.autograd.set_detect_anomaly(True)
 def run(_run, _config, _log):
     # check args sanity
     _config = args_sanity_check(_config, _log)
