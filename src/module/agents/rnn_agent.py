@@ -57,8 +57,8 @@ class RNNAttackerAgent(nn.Module):
         x = x.view(-1, self.args.max_message_num_per_round, self.msg_action_shape)  # split
         msg_types, signer_ids, view_nums, seq_nums, vals, receiver_ids, certificates = x.split([num_msg_type,
                                                                                                 self.args.num_malicious,
-                                                                                                self.args.episode_limit/4,
-                                                                                                self.args.episode_limit/4,
+                                                                                                self.args.max_view_num,
+                                                                                                self.args.max_seq_num,
                                                                                                 self.args.total_client_vals,
                                                                                                 self.args.n_peers,
                                                                                                 self.args.n_peers*2], dim=2)
