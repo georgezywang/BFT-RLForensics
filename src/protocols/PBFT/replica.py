@@ -62,6 +62,8 @@ class PBFTagent():
         if self.idle_timer <= 0 or self.commit_timer <= 0 or self.view_change_timer <= 0:
             self._try_to_enter_view()
 
+        return copy.deepcopy(self.msgs_to_be_send)
+
     def on_msg(self, msg):
         if msg.msg_type == type_dict["Client"]:
             self._on_client_msg(msg)

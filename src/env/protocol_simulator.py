@@ -115,10 +115,10 @@ class ProtocolSimulator(MultiAgentEnv):
         # gather responses and empty buffers of scripted protocol agents
         # optional: simulate traffic overflow scenario (fix the size of identifier's obs)
         for r in self.honest_replicas:
-            print(len(self.replica_msg_buffers[r.id]))
-            print(len(self.replica_msg_buffers[r.id][0:self.max_messages_per_round]))
+            # print(len(self.replica_msg_buffers[r.id]))
+            # print(len(self.replica_msg_buffers[r.id][0:self.max_messages_per_round]))
             response = r.handle_msgs(self.replica_msg_buffers[r.id][0:self.max_messages_per_round])
-            print(len(response))
+            # print(len(response))
             self.total_msgs_per_round.extend(response)
             self.replica_msg_buffers[r.id] = self.replica_msg_buffers[r.id][self.max_messages_per_round:]
 
