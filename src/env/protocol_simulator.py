@@ -338,7 +338,7 @@ class ProtocolSimulator(MultiAgentEnv):
         else:
             zeros = [0] * self.args.n_peers * 2
             inputs.extend(zeros)
-        print("msg_len in actual attacker obs".format(len(inputs)))
+        print("msg_len in actual attacker obs: {}".format(len(inputs)))
         return inputs
 
     def _replica_msg_to_input(self, msg):
