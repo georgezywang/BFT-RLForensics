@@ -177,8 +177,8 @@ class SeparateLearner:
             running_log["critic_grad_norm"].append(grad_norm)
             mask_elems = mask_t.sum().item()
             running_log["td_error_abs"].append((masked_td_error.abs().sum().item() / mask_elems))
-            running_log["q_taken_mean"].append((q_t * mask_t).sum().item() / mask_elems)
-            running_log["target_mean"].append((targets_t * mask_t).sum().item() / mask_elems)
+            running_log["q_taken_mean"].append((q_vals[:, t] * mask_t).sum().item() / mask_elems)
+            running_log["target_mean"].append((targets[:, t] * mask_t).sum().item() / mask_elems)
 
         return q_vals, running_log
 
