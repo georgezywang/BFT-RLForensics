@@ -361,7 +361,7 @@ class ProtocolSimulator(MultiAgentEnv):
                 msg.msg_type == type_dict["CommitCertificate"] or msg.msg_type == type_dict["NewView"]):
             inputs.extend(list_onehot(msg.certificate, self.args.n_peers))
         else:
-            zeros = [0] * self.args.n_peers
+            zeros = [0] * self.args.n_peers * 2
             inputs.extend(zeros)
         return inputs
 
