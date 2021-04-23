@@ -56,8 +56,8 @@ class ProtocolSimulator(MultiAgentEnv):
         self.identifier_reward = 0
 
         # assign ids
-        replica_ids = random.shuffle([idx for idx in range(self.n_replicas)])
-        print(replica_ids)
+        replica_ids = [idx for idx in range(self.n_replicas)]
+        replica_ids = random.shuffle(replica_ids)
         self.malicious_ids = replica_ids[0:self.n_malicious]
         self.honest_ids = replica_ids[self.n_malicious:]
 
