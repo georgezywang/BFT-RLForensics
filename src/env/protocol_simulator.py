@@ -263,7 +263,7 @@ class ProtocolSimulator(MultiAgentEnv):
                         len(client_vals) + self.n_malicious + self.args.n_peers * 2
         malicious_ids = self.n_malicious * self.n_malicious
         obs_size = int(self.args.max_message_num_per_round * msg_obs_space * self.args.num_malicious + malicious_ids)
-        print("attacker_obs_size: {}".format(obs_size))
+        print("attacker_obs_size: {}, msg_obs_space: {}".format(obs_size, msg_obs_space))
         return obs_size
 
     def get_identifier_obs_size(self):
@@ -338,6 +338,7 @@ class ProtocolSimulator(MultiAgentEnv):
         else:
             zeros = [0] * self.args.n_peers * 2
             inputs.extend(zeros)
+        print("msg_len in actual attacker obs".format(len(inputs)))
         return inputs
 
     def _replica_msg_to_input(self, msg):
