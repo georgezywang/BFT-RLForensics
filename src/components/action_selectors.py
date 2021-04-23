@@ -94,6 +94,7 @@ class EpsilonGreedyAttackerActionSelector():
         picked.append(picked_sigs)
         # print("picked action: {}".format([x.shape for x in picked]))
         picked = torch.cat(picked, dim=-1)
+        print("action shape: {}".format(picked.shape))
         return picked.view(bs, -1)  # [bs, max_num_msg_per_round, msg_space]
 
 
