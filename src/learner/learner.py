@@ -129,7 +129,7 @@ class SeparateLearner:
         rewards = th.cat(rewards, dim=-1)  # [bs, t, 2]
 
         target_critic_outs = []
-        target_critic_hidden = self.target_critic.init_hidden().expand(batch.batch_size, 1)
+        target_critic_hidden = self.target_critic.init_hidden().expand(batch.batch_size, -1)
         for t in range(batch.max_seq_length):
             out, target_critic_hidden = self.target_critic.forward(batch, target_critic_hidden, t)  # (bs, 2)
             target_critic_outs.append(out)  # [t,(bs, 2)]
@@ -148,7 +148,7 @@ class SeparateLearner:
             "q_taken_mean": [],
         }
 
-        critic_hidden = self.critic.init_hidden().expand(batch.batch_size, 1)
+        critic_hidden = self.critic.init_hidden().expand(batch.batch_size, -1)
         for t in reversed(range(rewards.size(1))):
             mask_t = mask[:, t].expand(-1, self.n_agents)
             if mask_t.sum() == 0:
