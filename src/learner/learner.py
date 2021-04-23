@@ -86,7 +86,7 @@ class SeparateLearner:
 
         num_action_types = len(attacker_outs[0])
         total_msgs_num = self.args.num_malicious * self.args.max_message_num_per_round
-        attacker_mask = mask.clnoe().repeat(1, 1, total_msgs_num)
+        attacker_mask = mask.clone().repeat(1, 1, total_msgs_num)
         pi = []
         for idx in range(num_action_types-1):
             out = th.stack([attacker_outs[t][idx] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, num_action]
@@ -106,7 +106,7 @@ class SeparateLearner:
         log_attacker_pi = th.log(pi).sum(-1)
 
 
-        attacker_loss = ((q_vals[:, :, 0].detach() * log_attacker_pi) * mask.clone()).sum() / mask.clone().sum()
+        attacker_loss = ((q_vals[:, :, 0].reshape(-1).detach() * log_attacker_pi.reshape(-1)) * mask.clone()).sum() / mask.clone().sum()
         self.attacker_optimiser.zero_grad()
         attacker_loss.backward()
         attacker_grad_norm = th.nn.utils.clip_grad_norm_(self.attacker_params, self.args.grad_norm_clip)
