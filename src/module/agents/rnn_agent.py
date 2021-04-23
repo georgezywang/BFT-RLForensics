@@ -79,4 +79,4 @@ class RNNAttackerAgent(nn.Module):
         msg_action_space = num_msg_type + self.args.num_malicious + \
                            self.args.episode_limit / 4 + self.args.episode_limit / 4 + \
                            self.args.total_client_vals + self.args.n_peers + self.args.n_peers*2
-        return msg_action_space
+        return int(msg_action_space)
