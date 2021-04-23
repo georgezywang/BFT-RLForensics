@@ -23,6 +23,7 @@ class EpisodeBatch:
         self.preprocess = {} if preprocess is None else preprocess
         self.device = device
 
+        print("max_seq_length: {}".format(max_seq_length))
         if data is not None:
             self.data = data
         else:
