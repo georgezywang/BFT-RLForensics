@@ -1,12 +1,11 @@
 # --- Defaults --- Adapted From ROMA Codebase
 
 # --- pymarl options ---
-meta_type: "normal"
 runner: "episode" # Runs 1 env for an episode
-mac: "shared" # Basic controller
-env: "surviving" # Environment name
+mac: "separate" # Basic controller
+env: "protocol" # Environment name
 env_args: {} # Arguments for the environment
-learner: q_learner
+learner: "separate_learner"
 batch_size_run: 1 # Number of environments to run in parallel
 test_nepisode: 20 # Number of episodes to test for
 test_interval: 2000 # Test after {} timesteps have passed
@@ -39,10 +38,7 @@ optim_eps: 0.00001 # RMSProp epsilon
 grad_norm_clip: 10 # Reduce magnitude of gradients above this L2 norm
 
 # --- Agent parameters ---
-agent: "dgn_agent" # Default rnn agent
-hidden_dim: 64
-obs_agent_id: True
-obs_last_action: False
+# all prefixed in code
 
 # --- Experiment running params ---
 repeat_id: 1
