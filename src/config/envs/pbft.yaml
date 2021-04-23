@@ -10,21 +10,23 @@ num_transcripts_avail: 2
 
 #initialization (break things if they are not set to 0)
 initialized_seq_num: 0
+max_seq_num: 10
 initialized_view_num: 0
+max_view_num: 10  # make sure not possible to exceed
 initialized_primary: 0
 
 work_window_size: 10
-idle_timer_limit: 5
-commit_timer_limit: 5
-view_change_duration: 5
+idle_timer_limit: 10
+commit_timer_limit: 10
+view_change_duration: 10
 simulator_id: 25
 
 # both received and send
-max_message_num_per_round: 4
+max_message_num_per_round: 2
 
 # specify obs size and action size
 
-episode_limit: 500
+episode_limit: 50
 
 # reward
 identifier_reward_consensus_reached: 0

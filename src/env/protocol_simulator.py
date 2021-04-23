@@ -150,7 +150,8 @@ class ProtocolSimulator(MultiAgentEnv):
         rewards = [self.attacker_reward, self.identifier_reward]
 
         if self.args.terminate_after_consensus_breached:
-            terminated = status == consensus_status["violated"] or self.round_counter > self.args.episode_limit
+            terminated = (status == consensus_status["violated"] or self.round_counter > self.args.episode_limit
+                          or self.client_request_seq_num > self.args.max_seq_num)
 
         env_info = {}
 
@@ -191,8 +192,8 @@ class ProtocolSimulator(MultiAgentEnv):
         # TODO: output attacker's messages and identifier's choices of attackers
         num_msg_type = 10  # no client type, 9 is no-op
         msg_action_space = int(num_msg_type + self.args.num_malicious + \
-                           self.args.episode_limit / 4 + self.args.episode_limit / 4 + \
-                           len(client_vals) + self.args.n_peers + self.args.n_peers*2)
+                               self.args.max_seq_num + self.args.max_view_num + \
+                               len(client_vals) + self.args.n_peers + self.args.n_peers * 2)
         attacker_action_d = np.reshape(attacker_action, (self.args.max_message_num_per_round, msg_action_space))
         attacker_ret = []
         for idx in range(self.args.max_message_num_per_round):
@@ -244,8 +245,8 @@ class ProtocolSimulator(MultiAgentEnv):
     def get_attacker_action_size(self):
         num_msg_type = 10  # no client type, 9 is no-op
         msg_action_space = num_msg_type + self.args.num_malicious + \
-                           self.args.episode_limit / 4 + self.args.episode_limit / 4 + \
-                           len(client_vals) + self.args.n_peers + self.args.n_peers*2
+                           self.args.max_view_num + self.args.max_seq_num + \
+                           len(client_vals) + self.args.n_peers + self.args.n_peers * 2
         return int(msg_action_space * self.args.max_message_num_per_round * self.args.num_malicious)
 
     def get_identifier_action_size(self):
@@ -253,25 +254,21 @@ class ProtocolSimulator(MultiAgentEnv):
 
     def get_attacker_obs_size(self):
         num_msg_type = 11  # with client
-        msg_obs_space = num_msg_type + self.args.episode_limit / 4 + \
-                        self.args.episode_limit / 4 + self.args.n_peers + \
-                        len(client_vals) + self.n_malicious + self.args.n_peers*2
+        msg_obs_space = num_msg_type + self.args.max_view_num + self.args.max_seq_num + self.args.n_peers + \
+                        len(client_vals) + self.n_malicious + self.args.n_peers * 2
         malicious_ids = self.n_malicious * self.n_malicious
         return int(self.args.max_message_num_per_round * msg_obs_space * self.args.num_malicious + malicious_ids)
 
     def get_identifier_obs_size(self):
         num_msg_type = 11  # with client
-        msg_obs_space = num_msg_type + self.args.episode_limit / 4 + \
-                        self.args.episode_limit / 4 + self.args.n_peers + \
-                        len(client_vals) + self.args.n_peers + self.args.n_peers*2
+        msg_obs_space = num_msg_type + self.args.max_view_num + self.args.max_seq_num + self.args.n_peers + \
+                        len(client_vals) + self.args.n_peers + self.args.n_peers * 2
         transcript_ids = self.n_replicas * self.args.num_transcripts_avail
-        return int(self.args.max_message_num_per_round * self.args.num_transcripts_avail * msg_obs_space + transcript_ids)
+        return int(
+            self.args.max_message_num_per_round * self.args.num_transcripts_avail * msg_obs_space + transcript_ids)
 
     def _parse_input_message(self, msg_input):
-        num_msg_type = 10  # no client type, 9 is no-op
-        # msg_action_space = num_msg_type + self.args.num_malicious + \
-        #                    self.args.episode_limit / 4 + self.args.episode_limit / 4 + \
-        #                    len(client_vals) + self.args.n_peers + self.args.n_peers
+        num_msg_type = 10
         params = {}
         idx = 0
         msg_type_input = msg_input[idx: num_msg_type]
@@ -284,14 +281,14 @@ class ProtocolSimulator(MultiAgentEnv):
         params["signer_id"] = self.malicious_ids[rev_onehot(sender_id_input)]
 
         idx += self.n_malicious
-        view_num_input = msg_input[idx: idx + int(self.episode_limit / 4)]
+        view_num_input = msg_input[idx: idx + self.args.max_view_num]
         params["view_num"] = rev_onehot(view_num_input)
 
-        idx += int(self.episode_limit / 4)
-        seq_num_input = msg_input[idx: idx + int(self.episode_limit / 4)]
+        idx += self.args.max_view_num
+        seq_num_input = msg_input[idx: idx + self.args.max_seq_num]
         params["seq_num"] = rev_onehot(seq_num_input)
 
-        idx += int(self.episode_limit / 4)
+        idx += self.args.max_seq_num
         val_input = msg_input[idx: idx + len(client_vals)]
         params["val"] = rev_onehot(val_input)
 
@@ -320,9 +317,9 @@ class ProtocolSimulator(MultiAgentEnv):
         # add signer_id
         inputs.extend(onehot(msg.signer_id, self.args.n_peers))
         # add view_num
-        inputs.extend(onehot(msg.view_num, int(self.args.episode_limit / 4)))
+        inputs.extend(onehot(msg.view_num, self.args.max_view_num))
         # add seq_num
-        inputs.extend(onehot(msg.seq_num, int(self.args.episode_limit / 4)))
+        inputs.extend(onehot(msg.seq_num, self.args.max_seq_num))
         # add vals
         inputs.extend(onehot(msg.val, len(client_vals)))
         # add receiver_id
@@ -332,7 +329,7 @@ class ProtocolSimulator(MultiAgentEnv):
                 msg.msg_type == type_dict["CommitCertificate"] or msg.msg_type == type_dict["NewView"]):
             inputs.extend(list_onehot(msg.certificate, self.args.n_peers))
         else:
-            zeros = [0] * self.args.n_peers*2
+            zeros = [0] * self.args.n_peers * 2
             inputs.extend(zeros)
         return inputs
 
@@ -344,9 +341,9 @@ class ProtocolSimulator(MultiAgentEnv):
         # add signer_id
         inputs.extend(onehot(msg.signer_id, self.args.n_peers))
         # add view_num
-        inputs.extend(onehot(msg.view_num, int(self.args.episode_limit / 4)))
+        inputs.extend(onehot(msg.view_num, self.args.max_view_num))
         # add seq_num
-        inputs.extend(onehot(msg.seq_num, int(self.args.episode_limit / 4)))
+        inputs.extend(onehot(msg.seq_num, self.args.max_seq_num))
         # add vals
         inputs.extend(onehot(msg.val, len(client_vals)))
         # add receiver_id
@@ -362,9 +359,9 @@ class ProtocolSimulator(MultiAgentEnv):
 
     def _decoy_msgs(self, num):
         num_msg_type = 11
-        msg_obs_space = int(num_msg_type + self.args.episode_limit / 4 + \
-                        self.args.episode_limit / 4 + self.args.n_peers + \
-                        len(client_vals) + self.args.n_peers + self.args.n_peers*2)
+        msg_obs_space = int(num_msg_type + self.args.max_view_num + \
+                            self.args.max_seq_num + self.args.n_peers + \
+                            len(client_vals) + self.args.n_peers + self.args.n_peers * 2)
         return [0] * msg_obs_space * num
 
     def _malicious_id_idx(self, r_id):
@@ -373,6 +370,8 @@ class ProtocolSimulator(MultiAgentEnv):
                 return idx
         print("Invalid id at _malicious_id_idx")
         return 0
+
+
 """
 attacker action type: * self.args.max_message_num_per_round * self.num_malicious
     - message type: 0-9                                 num_action_space = 10  *9 is no-op
@@ -428,9 +427,7 @@ def list_onehot(x, n):  # for certificate
 
 def rev_list_onehot(x):  # for certificates
     ret = []
-    for idx in range(len(x)/2):
-        if x[2*idx] == 1:  # chosen
+    for idx in range(len(x) / 2):
+        if x[2 * idx] == 1:  # chosen
             ret.append(idx)
     return ret
-
-
