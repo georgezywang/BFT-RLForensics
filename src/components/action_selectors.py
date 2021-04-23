@@ -77,6 +77,7 @@ class EpsilonGreedyAttackerActionSelector():
             random_actions = Categorical(probs).sample(choices.shape).long()
             picked_actions = pick_random * random_actions + (1 - pick_random) * choices
             picked.append(torch.eye(num_choices)[picked_actions])
+            print(num_choices)
 
         picked_sigs = []
         for c_id in range(self.args.n_peers):  # ([bs, max_msg_num, 2])*n_peers
