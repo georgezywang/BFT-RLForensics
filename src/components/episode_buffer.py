@@ -23,7 +23,7 @@ class EpisodeBatch:
         self.preprocess = {} if preprocess is None else preprocess
         self.device = device
 
-        print("max_seq_length: {}".format(max_seq_length))
+        # print("max_seq_length: {}".format(max_seq_length))
         if data is not None:
             self.data = data
         else:
@@ -112,6 +112,7 @@ class EpisodeBatch:
                 v.to(self.device)
             # print("crash: k {}, v{}".format(k,v))
             # print("shape v :{}, target: {}".format(v.shape, target[k].shape))
+            print("slices: {}".format(_slices))
             self._check_safe_view(v, target[k][_slices])
             target[k][_slices] = v.view_as(target[k][_slices])
 
