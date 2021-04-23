@@ -76,9 +76,11 @@ class SeparateLearner:
         identifier_chosen_action_pi = th.gather(identifier_outs[:, :-1], dim=3, index=identifier_actions).squeeze(3)  # Remove the last dim
         identifier_mask = mask.clone().repeat(1, 1, self.n_peers)
         identifier_chosen_action_pi[identifier_mask == 0] = 1
-        log_identifier_chosen_action_pi = th.log(identifier_chosen_action_pi).sum(dim=-1)
+        log_identifier_pi = th.log(identifier_chosen_action_pi).sum(dim=-1)
 
-        identifier_loss = ((q_vals[:, :, 1].detach() * log_identifier_chosen_action_pi) * identifier_mask).sum() / identifier_mask.sum()
+        print(q_vals[:, :, 1].shape)
+        print( log_identifier_pi.shape)
+        identifier_loss = ((q_vals[:, :, 1].detach() * log_identifier_pi) * identifier_mask).sum() / identifier_mask.sum()
         self.identifier_optimiser.zero_grad()
         identifier_loss.backward()
         identifier_grad_norm = th.nn.utils.clip_grad_norm_(self.identifier_params, self.args.grad_norm_clip)
@@ -105,8 +107,7 @@ class SeparateLearner:
         pi = th.cat([pi, cert_pi], dim=-1)
         log_attacker_pi = th.log(pi).sum(-1)
 
-        print(q_vals[:, :, 0].shape)
-        print(log_attacker_pi.shape)
+
         attacker_loss = ((q_vals[:, :, 0].detach() * log_attacker_pi) * mask).sum() / mask.sum()
         self.attacker_optimiser.zero_grad()
         attacker_loss.backward()
