@@ -9,8 +9,6 @@ class Critic(nn.Module):
         super(Critic, self).__init__()
 
         self.args = args
-        self.n_actions = args.n_actions
-        self.n_agents = args.n_agents
 
         input_shape = self._get_input_shape(scheme)
         self.output_type = "q"
