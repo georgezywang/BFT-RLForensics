@@ -16,6 +16,7 @@ type_dict = {"PrePrepare": 0,
              "No-op": 9,
              "Client": 10, }
 
+
 class PBFTagent():
     def __init__(self, args):
         self.args = args
@@ -154,8 +155,10 @@ class PBFTagent():
                           "receiver_id": msg.sender_id}
                 if self.mainlog.get_entry(msg.seq_num).is_commit_ready():
                     params["msg_type"] = "CommitCertificate"
+                    params["certificate"] = copy.deepcopy(self.mainlog.get_entry(msg.seq_num).commit_sigs)
                 else:
                     params["msg_type"] = "PrepareCertificate"
+                    params["certificate"] = copy.deepcopy(self.mainlog.get_entry(msg.seq_num).prepare_sigs)
                 self.msgs_to_be_send.append(create_message(self.args, params))
                 return
             msg_added = self.mainlog.get_entry(msg.seq_num).add_message(msg)
@@ -187,7 +190,8 @@ class PBFTagent():
                           "seq_num": msg.seq_num,
                           "signer_id": self.id,
                           "val": msg.val,
-                          "receiver_id": msg.sender_id}
+                          "receiver_id": msg.sender_id,
+                          "certificate": copy.deepcopy(self.mainlog.get_entry(msg.seq_num).commit_sigs)}
                 self.msgs_to_be_send.append(create_message(self.args, params))
                 return
             msg_added = self.mainlog.get_entry(msg.seq_num).add_message(msg)
@@ -242,7 +246,7 @@ class PBFTagent():
                                   "seq_num": self.last_committed_seq_num + 1,
                                   "signer_id": self.id,
                                   "val": msg.val,
-                                  "certificate": self.mainlog.get_view_entry(self.changing_view).view_change_sigs}
+                                  "certificate": copy.deepcopy(self.mainlog.get_view_entry(self.changing_view).view_change_sigs)}
                         self._create_broadcast_messages(params)
                         self._go_to_next_view(self.last_committed_seq_num + 1)
 
@@ -340,8 +344,10 @@ class PBFTagent_wrapper():  # attacker
                 or msg_type == type_dict["NewView"]):
             for sig_id in msg.certificate:
                 is_friend = sig_id in friend_ids
-                is_collected = (msg_type == type_dict["PrepareCertificate"] and sig_id in self.mainlog.get_entry[msg.seq_num].prepare_sigs) \
-                               or (msg_type == type_dict["CommitCertificate"] and sig_id in self.mainlog.get_entry[msg.seq_num].commit_sigs)
+                is_collected = (msg_type == type_dict["PrepareCertificate"] and sig_id in self.mainlog.get_entry[
+                    msg.seq_num].prepare_sigs) \
+                               or (msg_type == type_dict["CommitCertificate"] and sig_id in self.mainlog.get_entry[
+                    msg.seq_num].commit_sigs)
                 if not (is_friend or is_collected):
                     flag = False
 

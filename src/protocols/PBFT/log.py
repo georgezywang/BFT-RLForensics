@@ -91,7 +91,7 @@ class Entry():
 
     def _add_prepare_cert(self, msg):
         self.prepare_sigs = copy.deepcopy(msg.certificate)
-        self.val = msg.val
+        self.val = msg.val  # overturn confirmed value
         return True
 
     def _add_commit_cert(self, msg):

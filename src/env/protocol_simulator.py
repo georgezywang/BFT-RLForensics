@@ -192,7 +192,7 @@ class ProtocolSimulator(MultiAgentEnv):
         num_msg_type = 10  # no client type, 9 is no-op
         msg_action_space = num_msg_type + self.args.num_malicious + \
                            self.args.episode_limit / 4 + self.args.episode_limit / 4 + \
-                           len(client_vals) + self.args.n_peers + self.args.n_peers
+                           len(client_vals) + self.args.n_peers + self.args.n_peers*2
         attacker_action_d = np.reshape(attacker_action, (self.args.max_message_num_per_round, msg_action_space))
         attacker_ret = []
         for idx in range(self.args.max_message_num_per_round):
