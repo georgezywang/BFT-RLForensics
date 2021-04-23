@@ -226,14 +226,14 @@ class SeparateLearner:
         msg.append(rev_onehot(sender_id_input))
 
         idx += self.args.num_malicious
-        view_num_input = msg_input[idx: idx + self.args.episode_limit / 4]
+        view_num_input = msg_input[idx: idx + self.args.max_view_num]
         msg.append(rev_onehot(view_num_input))
 
-        idx += self.args.episode_limit / 4
-        seq_num_input = msg_input[idx: idx + self.args.episode_limit / 4]
+        idx += self.args.max_view_num
+        seq_num_input = msg_input[idx: idx + self.args.max_seq_num]
         msg.append(rev_onehot(seq_num_input))
 
-        idx += self.args.episode_limit / 4
+        idx += self.args.max_seq_num
         val_input = msg_input[idx: idx + self.args.total_client_vals]
         msg.append(rev_onehot(val_input))
 
