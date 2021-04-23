@@ -67,7 +67,7 @@ class SeparateLearner:
 
         # learn identifier actor
         identifier_outs = th.stack(identifier_outs, dim=1)  # Concat over time
-        identifier_outs = th.cat([identifier_outs, 1 - identifier_outs], dim=-1).view(bs, b_len, self.n_peers, 2)
+        identifier_outs = th.cat([identifier_outs, 1 - identifier_outs], dim=-1).reshape(bs, b_len, self.n_peers, 2)
         # (bs,t,n,n_actions), Q values of n_actions
 
         # Pick the Q-Values for the actions taken by each agent
@@ -76,7 +76,7 @@ class SeparateLearner:
         identifier_chosen_action_pi[identifier_mask == 0] = 1
         log_identifier_chosen_action_pi = th.log(identifier_chosen_action_pi).sum(dim=-1)
 
-        identifier_loss = ((q_vals[:, :, 1].view(-1, 1).detach() * log_identifier_chosen_action_pi).view(-1, 1) * mask).sum() / mask.sum()
+        identifier_loss = ((q_vals[:, :, 1].reshape(-1, 1).detach() * log_identifier_chosen_action_pi).reshape(-1, 1) * mask).sum() / mask.sum()
         self.identifier_optimiser.zero_grad()
         identifier_loss.backward()
         identifier_grad_norm = th.nn.utils.clip_grad_norm_(self.identifier_params, self.args.grad_norm_clip)
@@ -101,9 +101,9 @@ class SeparateLearner:
             cert_pi.append(out)
         cert_pi = th.cat(cert_pi, dim=-1)
         pi = th.cat([pi, cert_pi], dim=-1)
-        log_attacker_pi = th.log(pi).sum(-1).view(-1, 1)
+        log_attacker_pi = th.log(pi).sum(-1).reshape(-1, 1)
 
-        attacker_loss = ((q_vals[:, :, 0].view(-1, 1).detach() * log_attacker_pi) * mask).sum() / mask.sum()
+        attacker_loss = ((q_vals[:, :, 0].reshape(-1, 1).detach() * log_attacker_pi) * mask).sum() / mask.sum()
         self.attacker_optimiser.zero_grad()
         attacker_loss.backward()
         attacker_grad_norm = th.nn.utils.clip_grad_norm_(self.attacker_params, self.args.grad_norm_clip)
@@ -188,7 +188,7 @@ class SeparateLearner:
         t_len = actions.size(1)
         total_msgs_num = self.args.num_malicious * self.args.max_message_num_per_round
         print("actions_shape: {}".format(actions.shape))
-        actions = actions.view(bs, t_len, total_msgs_num, -1)
+        actions = actions.reshape(bs, t_len, total_msgs_num, -1)
         parsed_actions = []
         for bs_idx in range(bs):
             parsed_actions_t = []
@@ -211,7 +211,7 @@ class SeparateLearner:
                         parsed_actions_t_msg.append(parsed_actions[bs_idx][t_idx][msg_idx][idx])
                     parsed_actions_t.append(parsed_actions_t_msg)
                 parsed_actions_idx.append(parsed_actions_t)
-            ret.append(th.tensor(parsed_actions_idx, dtype=th.long))
+            ret.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
 
         ret_cert = []
         for idx in range(self.n_peers):
@@ -224,7 +224,7 @@ class SeparateLearner:
                         parsed_actions_t_msg.append(parsed_actions[bs_idx][t_idx][msg_idx][-1][idx])
                     parsed_actions_t.append(parsed_actions_t_msg)
                 parsed_actions_idx.append(parsed_actions_t)
-            ret_cert.append(th.tensor(parsed_actions_idx, dtype=th.long))
+            ret_cert.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
 
         ret.append(ret_cert)
         return ret

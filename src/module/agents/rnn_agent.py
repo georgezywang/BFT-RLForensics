@@ -57,7 +57,7 @@ class RNNAttackerAgent(nn.Module):
         x, h = self.rnn(inputs, hidden_state)
         # time to dissemble x
         num_msg_type = 10
-        x = x.view(-1, self.args.max_message_num_per_round*self.args.num_malicious, self.msg_action_shape)  # split
+        x = x.reshape(-1, self.args.max_message_num_per_round*self.args.num_malicious, self.msg_action_shape)  # split
         msg_types, signer_ids, view_nums, seq_nums, vals, receiver_ids, certificates = x.split([num_msg_type,
                                                                                                 self.args.num_malicious,
                                                                                                 self.args.max_view_num,
