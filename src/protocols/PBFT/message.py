@@ -43,7 +43,7 @@ def create_message(args, params):
         return ViewChangeMsg(args=args,
                              view_num=params["view_num"],
                              signer_id=params["signer_id"],
-                             receiver_id=params["receiveir_id"])
+                             receiver_id=params["receiver_id"])
 
     else:
         return PBFTMessage(args=args,
