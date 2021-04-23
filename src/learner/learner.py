@@ -78,7 +78,7 @@ class SeparateLearner:
         identifier_chosen_action_pi[identifier_mask == 0] = 1
         log_identifier_pi = th.log(identifier_chosen_action_pi).sum(dim=-1)
 
-        identifier_loss = ((q_vals[:, :, 1].detach() * log_identifier_pi) * mask.clone()).sum() / mask.clone().sum()
+        identifier_loss = ((q_vals[:, :, 1].view(-1).detach() * log_identifier_pi.view(-1)) * mask.clone()).sum() / mask.clone().sum()
         self.identifier_optimiser.zero_grad()
         identifier_loss.backward()
         identifier_grad_norm = th.nn.utils.clip_grad_norm_(self.identifier_params, self.args.grad_norm_clip)
