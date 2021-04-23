@@ -74,9 +74,8 @@ class EpisodeRunner:
             attacker_actions, identifier_actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
             # pq: [1, agent_num, control_dim]
 
-            print(attacker_actions[0])
-            print(identifier_actions[0])
-            rewards, terminated, env_info = self.env.step(attacker_actions[0], identifier_actions[0])
+            actions = (attacker_actions[0], identifier_actions[0])
+            rewards, terminated, env_info = self.env.step(actions)
 
             attacker_episode_return += rewards[0]
             identifier_episode_return += rewards[1]
