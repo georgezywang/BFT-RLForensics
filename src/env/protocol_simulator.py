@@ -142,7 +142,7 @@ class ProtocolSimulator(MultiAgentEnv):
 
         attacker_action, identifier_action = actions
         attacker_messages, identifier_choices = self._parse_actions(attacker_action, identifier_action)
-        self.total_msgs_per_round.append(attacker_messages)
+        self.total_msgs_per_round.extend(attacker_messages)
 
         self._handle_reply_msgs_to_client()
         status = self._check_consensus()
