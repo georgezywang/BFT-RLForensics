@@ -83,7 +83,8 @@ class SeparateLearner:
         self.identifier_optimiser.step()
 
         num_action_types = len(attacker_outs[0])
-        attacker_mask = mask.clnoe().repeat(1, 1, self.args.max_message_num_per_round)
+        total_msgs_num = self.args.num_malicious * self.args.max_message_num_per_round
+        attacker_mask = mask.clnoe().repeat(1, 1, total_msgs_num)
         pi = []
         for idx in range(num_action_types-1):
             out = th.stack([attacker_outs[t][idx] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, num_action]
@@ -184,13 +185,14 @@ class SeparateLearner:
         # actions: [bs, t, num_max_msgs * ]
         bs = actions.size(0)
         t_len = actions.size(1)
-        actions = actions.view(bs, self.args.max_message_num_per_round, -1)
+        total_msgs_num = self.args.num_malicious * self.args.max_message_num_per_round
+        actions = actions.view(bs, total_msgs_num, -1)
         parsed_actions = []
         for bs_idx in range(bs):
             parsed_actions_t = []
             for t_idx in range(t_len):
                 parsed_actions_t_msg = []
-                for msg_idx in range(self.args.max_message_num_per_round):
+                for msg_idx in range(total_msgs_num):
                     parsed_actions_t_msg.append(self._parse_input_message(actions[bs_idx][t_idx][msg_idx]))
                 parsed_actions_t.append(parsed_actions_t_msg)
             parsed_actions.append(parsed_actions_t)

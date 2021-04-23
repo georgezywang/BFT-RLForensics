@@ -40,7 +40,8 @@ class SeparateMAC:
                 out = out.view(-1, epsilon_action_num)
                 exploring_out = ((1 - self.attacker_action_selector.epsilon) * out
                                  + th.ones_like(out) * self.attacker_action_selector.epsilon/epsilon_action_num)
-                exploring_out = exploring_out.view(ep_batch.batch_size, self.args.max_message_num_per_round, -1)
+                total_msgs_num = self.args.num_malicious*self.args.max_message_num_per_round
+                exploring_out = exploring_out.view(ep_batch.batch_size, total_msgs_num, -1)
                 exploring_attacker_outs.append(exploring_out)
 
             cert_outs = []
@@ -50,7 +51,8 @@ class SeparateMAC:
                 cert_out = cert_out.view(-1, epsilon_action_num)
                 exploring_cert_out = ((1 - self.attacker_action_selector.epsilon) * cert_out
                                  + th.ones_like(cert_out) * self.attacker_action_selector.epsilon / epsilon_action_num)
-                exploring_cert_out = exploring_cert_out.view(ep_batch.batch_size, self.args.max_message_num_per_round, -1)
+                total_msgs_num = self.args.num_malicious * self.args.max_message_num_per_round
+                exploring_cert_out = exploring_cert_out.view(ep_batch.batch_size, total_msgs_num, -1)
                 cert_outs.append(exploring_cert_out)
 
             exploring_attacker_outs.append(cert_outs)

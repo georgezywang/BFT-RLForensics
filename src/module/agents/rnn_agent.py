@@ -55,7 +55,7 @@ class RNNAttackerAgent(nn.Module):
         x, h = self.rnn(inputs, hidden_state)
         # time to dissemble x
         num_msg_type = 10
-        x = x.view(-1, self.args.max_message_num_per_round, self.msg_action_shape)  # split
+        x = x.view(-1, self.args.max_message_num_per_round*self.args.num_malicious, self.msg_action_shape)  # split
         msg_types, signer_ids, view_nums, seq_nums, vals, receiver_ids, certificates = x.split([num_msg_type,
                                                                                                 self.args.num_malicious,
                                                                                                 self.args.max_view_num,
@@ -69,11 +69,11 @@ class RNNAttackerAgent(nn.Module):
         view_nums = F.softmax(view_nums, dim=-1)
         seq_nums = F.softmax(seq_nums, dim=-1)
         vals = F.softmax(signer_ids, dim=-1)
-        print("vals shape: {}, vals: {}".format(vals.shape, vals))
+        # print("vals shape: {}, vals: {}".format(vals.shape, vals))
         receiver_ids = F.softmax(receiver_ids, dim=-1)
         for idx in range(len(certificates)):
-            print("sig shape: {}".format(certificates[idx].shape))
-            print("sig in certificate: {}".format(certificates[idx]))
+            # print("sig shape: {}".format(certificates[idx].shape))
+            # print("sig in certificate: {}".format(certificates[idx]))
             certificates[idx] = F.softmax(certificates[idx], dim=-1)
         x = (msg_types, signer_ids, view_nums, seq_nums, vals, receiver_ids, certificates)
         return x, h
