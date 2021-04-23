@@ -68,10 +68,11 @@ class RNNAttackerAgent(nn.Module):
         view_nums = F.softmax(view_nums, dim=-1)
         seq_nums = F.softmax(seq_nums, dim=-1)
         vals = F.softmax(signer_ids, dim=-1)
+        print("vals shape: {}, vals: {}".format(vals.shape, vals))
         receiver_ids = F.softmax(receiver_ids, dim=-1)
         for idx in range(len(certificates)):
             print("sig shape: {}".format(certificates[idx].shape))
-            print("sig in certificate: {}".format(certificates[idx].item()))
+            print("sig in certificate: {}".format(certificates[idx]))
             certificates[idx] = F.softmax(certificates[idx], dim=-1)
         x = (msg_types, signer_ids, view_nums, seq_nums, vals, receiver_ids, certificates)
         return x, h
