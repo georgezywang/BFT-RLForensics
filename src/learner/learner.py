@@ -89,7 +89,8 @@ class SeparateLearner:
         log_identifier_pi = th.log(identifier_chosen_action_pi).sum(dim=-1)
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
 
-        identifier_loss = ((q_vals[:, :, 1].reshape(-1).detach() * log_identifier_pi.reshape(-1)) * mask.clone()).sum() / mask.clone().sum()
+        identifier_critic = mask.clone().reshape(-1)
+        identifier_loss = ((q_vals[:, :, 1].reshape(-1).detach() * log_identifier_pi.reshape(-1)) * identifier_critic).sum() / identifier_critic.sum()
         # print("q_vals: 001{}".format(q_vals[0][0][1]))
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
         # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[0]))
@@ -97,7 +98,7 @@ class SeparateLearner:
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][1]))
         # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[1]))
         # print(q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))
-        print("mask shape: {}".format(mask.shape))
+        # print("mask shape: {}".format(mask.shape))
         self.identifier_optimiser.zero_grad()
         identifier_loss.backward()
         identifier_grad_norm = th.nn.utils.clip_grad_norm_(self.identifier_params, self.args.grad_norm_clip)
@@ -124,8 +125,8 @@ class SeparateLearner:
         pi = th.cat([pi, cert_pi], dim=-1)
         log_attacker_pi = th.log(pi).sum(-1)
 
-
-        attacker_loss = ((q_vals[:, :, 0].reshape(-1).detach() * log_attacker_pi.reshape(-1)) * mask.clone()).sum() / mask.clone().sum()
+        attacker_critic = mask.clone().reshape(-1)
+        attacker_loss = ((q_vals[:, :, 0].reshape(-1).detach() * log_attacker_pi.reshape(-1)) * attacker_critic).sum() / attacker_critic.sum()
         self.attacker_optimiser.zero_grad()
         attacker_loss.backward()
         attacker_grad_norm = th.nn.utils.clip_grad_norm_(self.attacker_params, self.args.grad_norm_clip)
