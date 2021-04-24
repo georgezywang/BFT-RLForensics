@@ -122,7 +122,7 @@ class EpsilonGreedyIdentifierActionSelector():
         random_numbers = torch.rand_like(agent_inputs)
         pick_random = (random_numbers < self.epsilon).long()
         probs = torch.tensor([1 / num_choices] * num_choices)
-        random_actions = Categorical(probs).sample(agent_inputs.shape).long()
+        random_actions = Categorical(probs).sample(agent_inputs.shape).long().to(device)
         picked_actions = pick_random * random_actions + (1 - pick_random) * agent_inputs.ge(0.5).long()
 
         return picked_actions
