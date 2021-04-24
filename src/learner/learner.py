@@ -1,13 +1,11 @@
 import copy
 
-from components.action_selectors import rev_onehot
 from components.critic.critic import Critic
 from components.episode_buffer import EpisodeBatch
 import torch as th
 import torch.nn.functional as F
 from torch.optim import Adam
 
-from env.protocol_simulator import rev_list_onehot
 from utils.rl_utils import build_td_lambda_targets
 
 
@@ -48,9 +46,9 @@ class SeparateLearner:
         attacker_rewards = batch["attacker_reward"][:, :-1]
         identifier_actions = batch["identifier_action"][:, :-1]
         attacker_actions = batch["attacker_action"][:, :-1]
-        print(attacker_actions)
+        # print(attacker_actions)
         attacker_actions = self._parse_attacker_actions(attacker_actions)
-        print(attacker_actions)
+        # print(attacker_actions)
         terminated = batch["terminated"][:, :-1].float()
         mask = batch["filled"][:, :-1].float()  # [bs, t-1, 1]
         mask[:, 1:] = mask[:, 1:] * (1 - terminated[:, :-1])
@@ -210,7 +208,7 @@ class SeparateLearner:
         bs = actions.size(0)
         t_len = actions.size(1)
         total_msgs_num = self.args.num_malicious * self.args.max_message_num_per_round
-        print("actions_shape: {}".format(actions.shape))
+        # print("actions_shape: {}".format(actions.shape))
         actions = actions.reshape(bs, t_len, total_msgs_num, -1)
         parsed_actions = []
         for bs_idx in range(bs):
@@ -265,17 +263,17 @@ class SeparateLearner:
 
         msg_type_input = msg_input[idx: num_msg_type]
         msg.append(rev_onehot(msg_type_input))
-        print("msg input shape: {}".format(msg_input.shape))
-        print("msg type: {}".format(msg_type_input))
-        print("msg type: {}".format(rev_onehot(msg_type_input)))
+        # print("msg input shape: {}".format(msg_input.shape))
+        # print("msg type: {}".format(msg_type_input))
+        # print("msg type: {}".format(rev_onehot(msg_type_input)))
 
         idx = num_msg_type
         sender_id_input = msg_input[idx: idx + self.args.num_malicious]
 
         msg.append(rev_onehot(sender_id_input))
-        print("sender id shape: {}".format(sender_id_input.shape))
-        print("sender id: {}".format(sender_id_input))
-        print("sender id: {}".format(rev_onehot(sender_id_input)))
+        # print("sender id shape: {}".format(sender_id_input.shape))
+        # print("sender id: {}".format(sender_id_input))
+        # print("sender id: {}".format(rev_onehot(sender_id_input)))
 
         idx += self.args.num_malicious
         view_num_input = msg_input[idx: idx + self.args.max_view_num]
@@ -296,9 +294,10 @@ class SeparateLearner:
         idx += self.args.n_peers
         certificate_input = msg_input[idx:]
         msg.append(list_rev_onehot(certificate_input))
-        print("certificate shape: {}".format(certificate_input.shape))
-        print("c id: {}".format(certificate_input))
-        print("c id: {}".format(list_rev_onehot(certificate_input)))
+        # print("certificate shape: {}".format(certificate_input.shape))
+        # print("c id: {}".format(certificate_input))
+        # print("c id: {}".format(list_rev_onehot(certificate_input)))
+        print("msg: {}".format(msg))
 
         return msg
 
@@ -340,3 +339,10 @@ def list_rev_onehot(x):  # for certificates
         else:
             ret.append(0)
     return ret
+
+
+def rev_onehot(x):  # anyvalue if invalid, will be masked out
+    for idx in range(len(x)):
+        if x[idx] == 1:
+            return idx
+    return 0
