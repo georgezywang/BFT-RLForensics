@@ -117,8 +117,8 @@ class SeparateLearner:
                            dim=1)  # [bs, t, max_msg, num_action]
             # print(out.shape)
             # print(attacker_actions[idx])
-            print(out.is_cuda)
-            print(attacker_actions[idx].is_cuda)
+            # print(out.is_cuda)
+            # print(attacker_actions[idx].is_cuda)
             out = th.gather(out[:, :-1], dim=3, index=attacker_actions[idx].unsqueeze(3)).squeeze(3)
             out[attacker_mask == 0] = 1.0
             pi.append(out)
@@ -240,7 +240,7 @@ class SeparateLearner:
                         parsed_actions_t_msg.append(parsed_actions[bs_idx][t_idx][msg_idx][idx])
                     parsed_actions_t.append(parsed_actions_t_msg)
                 parsed_actions_idx.append(parsed_actions_t)
-            ret.append(th.tensor(parsed_actions_idx, dtype=th.int64))
+            ret.append(th.tensor(parsed_actions_idx, dtype=th.int64).to(device))
             # ret.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
 
         ret_cert = []
