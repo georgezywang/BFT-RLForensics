@@ -112,8 +112,8 @@ class SeparateLearner:
         pi = []
         for idx in range(num_action_types-1):
             out = th.stack([attacker_outs[t][idx] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, num_action]
-            print(out.shape)
-            print(attacker_actions[idx])
+            # print(out.shape)
+            # print(attacker_actions[idx])
             out = th.gather(out[:, :-1], dim=3, index=attacker_actions[idx].unsqueeze(3)).squeeze(3)
             out[attacker_mask == 0] = 1.0
             pi.append(out)
@@ -297,7 +297,7 @@ class SeparateLearner:
         # print("certificate shape: {}".format(certificate_input.shape))
         # print("c id: {}".format(certificate_input))
         # print("c id: {}".format(list_rev_onehot(certificate_input)))
-        print("msg: {}".format(msg))
+        # print("msg: {}".format(msg))
 
         return msg
 
