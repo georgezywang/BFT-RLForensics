@@ -72,7 +72,7 @@ class SeparateLearner:
         # print("identifier_outs: {}".format(identifier_outs))
         identifier_outs = th.cat([identifier_outs, 1 - identifier_outs], dim=-1).reshape(bs, b_len, self.n_peers, 2)
         # print("identifier_outs_shape: {}".format(identifier_outs.shape))
-        print("stacked_identifier_outs: {}".format(identifier_outs[0][0]))
+        # print("stacked_identifier_outs: {}".format(identifier_outs[0][0]))
         # (bs,t,n,n_actions), Q values of n_actions
 
         # Pick the Q-Values for the actions taken by each agent
@@ -90,13 +90,14 @@ class SeparateLearner:
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
 
         identifier_loss = ((q_vals[:, :, 1].reshape(-1).detach() * log_identifier_pi.reshape(-1)) * mask.clone()).sum() / mask.clone().sum()
-        print("q_vals: 001{}".format(q_vals[0][0][1]))
-        print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
-        print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[0]))
-        print("q_vals 011: {}".format(q_vals[0][1][1]))
-        print("log_identifier_pi: {}".format(log_identifier_pi[0][1]))
-        print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[1]))
-        print(q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))
+        # print("q_vals: 001{}".format(q_vals[0][0][1]))
+        # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
+        # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[0]))
+        # print("q_vals 011: {}".format(q_vals[0][1][1]))
+        # print("log_identifier_pi: {}".format(log_identifier_pi[0][1]))
+        # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[1]))
+        # print(q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))
+        print("mask shape: {}".format(mask.shape))
         self.identifier_optimiser.zero_grad()
         identifier_loss.backward()
         identifier_grad_norm = th.nn.utils.clip_grad_norm_(self.identifier_params, self.args.grad_norm_clip)
