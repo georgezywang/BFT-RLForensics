@@ -90,6 +90,8 @@ class SeparateLearner:
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
 
         identifier_loss = ((q_vals[:, :, 1].reshape(-1).detach() * log_identifier_pi.reshape(-1)) * mask.clone()).sum() / mask.clone().sum()
+        print("q_vals".format(q_vals[0: 0: 1]))
+        print("log_identifier_pi".format(log_identifier_pi))
         print("q_vals * log_identifier_pi: {}".format(q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1)))
         self.identifier_optimiser.zero_grad()
         identifier_loss.backward()
