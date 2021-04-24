@@ -85,7 +85,7 @@ class SeparateLearner:
         identifier_mask = mask.clone().repeat(1, 1, self.n_peers)
         # print("identifier_mask: {}".format(identifier_mask[0][0]))
         identifier_chosen_action_pi[identifier_mask == 0] = 1
-        # print("identifier_chosen_action_pi after mask: {}".format(identifier_chosen_action_pi[0][0]))
+        print("identifier_chosen_action_pi after mask: {}".format(identifier_chosen_action_pi[0][1]))
         log_identifier_pi = th.log(identifier_chosen_action_pi).sum(dim=-1)
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
 
