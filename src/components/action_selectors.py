@@ -84,7 +84,8 @@ class EpsilonGreedyAttackerActionSelector():
         picked_sigs = []
         for c_id in range(self.args.n_peers):  # ([bs, max_msg_num, 2])*n_peers
             num_choices = agent_inputs[-1][c_id].size(-1)  # 2
-            random_numbers = torch.rand_like(agent_inputs[-1][c_id][:, :, 0])
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            random_numbers = torch.rand_like(agent_inputs[-1][c_id][:, :, 0]).to(device)
             pick_random = (random_numbers < self.epsilon).long()
             probs = torch.tensor([1 / num_choices] * num_choices)
             choices = agent_inputs[-1][c_id].max(dim=2)[1]
