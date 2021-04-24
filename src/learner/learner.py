@@ -84,8 +84,8 @@ class SeparateLearner:
         # print("identifier_chosen_action_pi: {}".format(identifier_chosen_action_pi[0][0]))
         identifier_mask = mask.clone().repeat(1, 1, self.n_peers)
         # print("identifier_mask: {}".format(identifier_mask[0][0]))
-        identifier_chosen_action_pi[identifier_mask == 0] = 1
-        print("identifier_chosen_action_pi after mask: {}".format(identifier_chosen_action_pi[0][1]))
+        identifier_chosen_action_pi[identifier_mask == 0] = 1.0
+        # print("identifier_chosen_action_pi after mask: {}".format(identifier_chosen_action_pi[0][1]))
         log_identifier_pi = th.log(identifier_chosen_action_pi).sum(dim=-1)
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
 
@@ -94,9 +94,9 @@ class SeparateLearner:
         # print("q_vals: 001{}".format(q_vals[0][0][1]))
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
         # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[0]))
-        print("q_vals 011: {}".format(q_vals[0][1][1]))
-        print("log_identifier_pi: {}".format(log_identifier_pi[0][1]))
-        print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[1]))
+        # print("q_vals 011: {}".format(q_vals[0][1][1]))
+        # print("log_identifier_pi: {}".format(log_identifier_pi[0][1]))
+        # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[1]))
         # print(q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))
         # print("mask shape: {}".format(mask.shape))
         self.identifier_optimiser.zero_grad()
@@ -119,7 +119,7 @@ class SeparateLearner:
         for r_id in range(self.n_peers):  # ([bs, max_msg_num, 2])*n_peers
             out = th.stack([attacker_outs[t][-1][r_id] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, 2]
             out = th.gather(out[:, :-1], dim=3, index=attacker_actions[-1][r_id].unsqueeze(3)).squeeze(3)
-            out[attacker_mask == 0] = 1
+            out[attacker_mask == 0] = 1.0
             cert_pi.append(out)
         cert_pi = th.cat(cert_pi, dim=-1)
         pi = th.cat([pi, cert_pi], dim=-1)
@@ -136,11 +136,11 @@ class SeparateLearner:
             self._update_targets()
             self.last_target_update_step = self.critic_training_steps
 
-        if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
-            self._update_targets()
-            self.last_target_update_episode = episode_num
-
         if t_env - self.log_stats_t >= self.args.learner_log_interval:
+            ts_logged = len(critic_train_stats["critic_loss"])
+            for key in ["critic_loss", "critic_grad_norm", "td_error_abs", "q_taken_mean", "target_mean"]:
+                self.logger.log_stat(key, sum(critic_train_stats[key]) / ts_logged, t_env)
+
             self.logger.log_stat("identifier_actor_loss", identifier_loss.item(), t_env)
             self.logger.log_stat("identifier_grad_norm", identifier_grad_norm, t_env)
             self.logger.log_stat("attacker_actor_loss", attacker_loss.item(), t_env)
@@ -169,7 +169,7 @@ class SeparateLearner:
             q_vals[:, t] = q_t
 
         td_error = (q_vals - targets)
-        mask_t = mask.expand(-1, -1, self.n_agents)
+        mask_t = mask.clone().expand(-1, -1, self.n_agents)
         # 0-out the targets that came from padded data
         masked_td_error = td_error * mask_t
 

@@ -150,7 +150,7 @@ class ProtocolSimulator(MultiAgentEnv):
         if self.round_counter % self.args.steps_per_new_client_request == 0:
             self._create_new_client_request()
 
-        self._check_identifier_correctness(identifier_choices)
+        identification_status = self._check_identifier_correctness(identifier_choices)
         rewards = [self.attacker_reward, self.identifier_reward]
 
         if self.args.terminate_after_consensus_breached:
@@ -158,16 +158,23 @@ class ProtocolSimulator(MultiAgentEnv):
                           or self.client_request_seq_num > self.args.max_seq_num)
         else:
             terminated = (self.round_counter >= self.args.episode_limit or self.client_request_seq_num > self.args.max_seq_num)
-
+        terminated = terminated and identification_status
         env_info = {}
 
         return rewards, terminated, env_info
 
     def _check_identifier_correctness(self, choices):
         correct = sum([1 for x in choices if x in self.malicious_ids])
-        incorrect = len(choices) - len(choices)
-        self.attacker_reward = correct * self.args.attacker_reward_correct_detection + incorrect * self.args.attacker_reward_incorrect_detection
-        self.identifier_reward = correct * self.args.identifier_reward_correct_detection + incorrect * self.args.identifier_reward_incorrect_detection
+        incorrect = sum(choices) - len(correct)
+        status = False
+        if correct >= self.args.f+1:
+            self.attacker_reward += correct * self.args.attacker_reward_correct_detection + incorrect * self.args.attacker_reward_incorrect_detection
+            self.identifier_reward += correct * self.args.identifier_reward_correct_detection + incorrect * self.args.identifier_reward_incorrect_detection
+            status = True
+        else:
+            self.identifier_reward += incorrect * self.args.identifier_reward_incorrect_detection
+            self.attacker_reward += incorrect * self.args.attacker_reward_incorrect_detection
+        return status
 
     def _handle_reply_msgs_to_client(self):
         for msg in self.total_msgs_per_round:
