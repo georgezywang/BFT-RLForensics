@@ -67,7 +67,7 @@ class SeparateLearner:
             identifier_outs.append(identifier_out)
 
         # learn identifier actor
-        identifier_outs = th.stack(identifier_outs, dim=1)  # Concat over time
+        identifier_outs = th.stack(identifier_outs, dim=1).unsqueeze(-1)  # Concat over time
         print("identifier_outs_shape: {}".format(identifier_outs.shape))
         print("identifier_outs: {}".format(identifier_outs))
         identifier_outs = th.cat([identifier_outs, 1 - identifier_outs], dim=-1).reshape(bs, b_len, self.n_peers, 2)
@@ -96,7 +96,7 @@ class SeparateLearner:
         for idx in range(num_action_types-1):
             out = th.stack([attacker_outs[t][idx] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, num_action]
             out = th.gather(out[:, :-1], dim=3, index=attacker_actions[idx].unsqueeze(3)).squeeze(3)
-            out[attacker_mask == 0] = 1
+            out[attacker_mask == 0] = 1.0
             pi.append(out)
         pi = th.cat(pi, dim=-1)
 
