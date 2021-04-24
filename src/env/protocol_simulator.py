@@ -158,7 +158,7 @@ class ProtocolSimulator(MultiAgentEnv):
                           or self.client_request_seq_num > self.args.max_seq_num)
         else:
             terminated = (self.round_counter >= self.args.episode_limit or self.client_request_seq_num > self.args.max_seq_num)
-        terminated = terminated and identification_status
+        terminated = terminated or identification_status
         env_info = {}
 
         return rewards, terminated, env_info
