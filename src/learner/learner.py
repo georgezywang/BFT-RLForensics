@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch.optim import Adam
 
 from utils.rl_utils import build_td_lambda_targets
-
+device = th.device("cuda:0" if th.cuda.is_available() else "cpu")
 
 class SeparateLearner:
     def __init__(self, mac, scheme, logger, args):
