@@ -82,7 +82,8 @@ class SeparateLearner:
         identifier_actions = identifier_actions.unsqueeze(3).type(th.int64)
         # print("identifier_actions_shape: {}".format(identifier_actions.shape))
         # print("identifier_actions: {}".format(identifier_actions[0][0]))
-        identifier_chosen_action_pi = th.gather(identifier_outs[:, :-1], dim=3, index=identifier_actions).squeeze(3)  # Remove the last dim
+        identifier_chosen_action_pi = th.gather(identifier_outs[:, :-1], dim=3, index=identifier_actions).squeeze(
+            3)  # Remove the last dim
         # print("identifier_chosen_action_pi: {}".format(identifier_chosen_action_pi[0][0]))
         identifier_mask = mask.clone().repeat(1, 1, self.n_peers)
         # print("identifier_mask: {}".format(identifier_mask[0][0]))
@@ -92,7 +93,8 @@ class SeparateLearner:
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
 
         identifier_critic = mask.clone().reshape(-1)
-        identifier_loss = ((q_vals[:, :, 1].reshape(-1).detach() * log_identifier_pi.reshape(-1)) * identifier_critic).sum() / identifier_critic.sum()
+        identifier_loss = ((q_vals[:, :, 1].reshape(-1).detach() * log_identifier_pi.reshape(
+            -1)) * identifier_critic).sum() / identifier_critic.sum()
         # print("q_vals: 001{}".format(q_vals[0][0][1]))
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
         # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[0]))
@@ -110,8 +112,9 @@ class SeparateLearner:
         total_msgs_num = self.args.num_malicious * self.args.max_message_num_per_round
         attacker_mask = mask.clone().repeat(1, 1, total_msgs_num)
         pi = []
-        for idx in range(num_action_types-1):
-            out = th.stack([attacker_outs[t][idx] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, num_action]
+        for idx in range(num_action_types - 1):
+            out = th.stack([attacker_outs[t][idx] for t in range(len(attacker_outs))],
+                           dim=1)  # [bs, t, max_msg, num_action]
             # print(out.shape)
             # print(attacker_actions[idx])
             out = th.gather(out[:, :-1], dim=3, index=attacker_actions[idx].unsqueeze(3)).squeeze(3)
@@ -121,7 +124,8 @@ class SeparateLearner:
 
         cert_pi = []
         for r_id in range(self.n_peers):  # ([bs, max_msg_num, 2])*n_peers
-            out = th.stack([attacker_outs[t][-1][r_id] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, 2]
+            out = th.stack([attacker_outs[t][-1][r_id] for t in range(len(attacker_outs))],
+                           dim=1)  # [bs, t, max_msg, 2]
             out = th.gather(out[:, :-1], dim=3, index=attacker_actions[-1][r_id].unsqueeze(3)).squeeze(3)
             out[attacker_mask == 0] = 1.0
             cert_pi.append(out)
@@ -130,7 +134,8 @@ class SeparateLearner:
         log_attacker_pi = th.log(pi).sum(-1)
 
         attacker_critic = mask.clone().reshape(-1)
-        attacker_loss = ((q_vals[:, :, 0].reshape(-1).detach() * log_attacker_pi.reshape(-1)) * attacker_critic).sum() / attacker_critic.sum()
+        attacker_loss = ((q_vals[:, :, 0].reshape(-1).detach() * log_attacker_pi.reshape(
+            -1)) * attacker_critic).sum() / attacker_critic.sum()
         self.attacker_optimiser.zero_grad()
         attacker_loss.backward()
         attacker_grad_norm = th.nn.utils.clip_grad_norm_(self.attacker_params, self.args.grad_norm_clip)
@@ -163,7 +168,8 @@ class SeparateLearner:
         target_critic_outs = th.stack(target_critic_outs, dim=1)  # [bs, t, 2]
 
         # Calculate td-lambda targets
-        targets = build_td_lambda_targets(rewards, terminated, mask, target_critic_outs, self.n_agents, self.args.gamma, self.args.td_lambda).detach()
+        targets = build_td_lambda_targets(rewards, terminated, mask, target_critic_outs, self.n_agents, self.args.gamma,
+                                          self.args.td_lambda).detach()
         # print("target shape： {}".format(targets.shape))
 
         q_vals = th.zeros_like(target_critic_outs)[:, :-1]  # [bs, t-1, 2]
@@ -222,7 +228,7 @@ class SeparateLearner:
 
         num_action_types = len(parsed_actions[0][0][0])  # so bad
         ret = []
-        for idx in range(num_action_types-1):
+        for idx in range(num_action_types - 1):
             parsed_actions_idx = []
             for bs_idx in range(bs):
                 parsed_actions_t = []
@@ -325,16 +331,20 @@ class SeparateLearner:
         # Not quite right but I don't want to save target networks
         self.target_mac.load_models(path)
         self.critic.load_state_dict(th.load("{}/critic.th".format(path), map_location=lambda storage, loc: storage))
-        self.target_critic.load_state_dict(th.load("{}/tar_critic.th".format(path), map_location=lambda storage, loc: storage))
-        self.identifier_optimiser.load_state_dict(th.load("{}/identifier_opt.th".format(path), map_location=lambda storage, loc: storage))
-        self.attacker_optimiser.load_state_dict(th.load("{}/attacker_opt.th".format(path), map_location=lambda storage, loc: storage))
-        self.critic_optimiser.load_state_dict(th.load("{}/critic_opt.th".format(path), map_location=lambda storage, loc: storage))
+        self.target_critic.load_state_dict(
+            th.load("{}/tar_critic.th".format(path), map_location=lambda storage, loc: storage))
+        self.identifier_optimiser.load_state_dict(
+            th.load("{}/identifier_opt.th".format(path), map_location=lambda storage, loc: storage))
+        self.attacker_optimiser.load_state_dict(
+            th.load("{}/attacker_opt.th".format(path), map_location=lambda storage, loc: storage))
+        self.critic_optimiser.load_state_dict(
+            th.load("{}/critic_opt.th".format(path), map_location=lambda storage, loc: storage))
 
 
 def list_rev_onehot(x):  # for certificates
     ret = []
-    for idx in range(len(x)//2):
-        if x[2*idx] == 1:  # chosen
+    for idx in range(len(x) // 2):
+        if x[2 * idx] == 1:  # chosen
             ret.append(1)
         else:
             ret.append(0)
