@@ -117,6 +117,8 @@ class SeparateLearner:
                            dim=1)  # [bs, t, max_msg, num_action]
             # print(out.shape)
             # print(attacker_actions[idx])
+            print(out.is_cuda)
+            print(attacker_actions[idx].is_cuda)
             out = th.gather(out[:, :-1], dim=3, index=attacker_actions[idx].unsqueeze(3)).squeeze(3)
             out[attacker_mask == 0] = 1.0
             pi.append(out)
