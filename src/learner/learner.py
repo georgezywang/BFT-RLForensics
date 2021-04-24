@@ -72,7 +72,7 @@ class SeparateLearner:
         print("identifier_outs: {}".format(identifier_outs))
         identifier_outs = th.cat([identifier_outs, 1 - identifier_outs], dim=-1).reshape(bs, b_len, self.n_peers, 2)
         print("identifier_outs_shape: {}".format(identifier_outs.shape))
-        print("stacked_identifier_outs".format(identifier_outs))
+        print("stacked_identifier_outs: {}".format(identifier_outs))
         # (bs,t,n,n_actions), Q values of n_actions
 
         # Pick the Q-Values for the actions taken by each agent
