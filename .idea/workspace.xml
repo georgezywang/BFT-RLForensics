@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d609e81d-e11f-41d4-b424-787c505a44d8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/envs/pbft.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/envs/pbft.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/env/protocol_simulator.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/env/protocol_simulator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/learner/learner.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/learner/learner.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

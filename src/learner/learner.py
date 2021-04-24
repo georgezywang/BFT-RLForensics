@@ -4,6 +4,7 @@ from components.action_selectors import rev_onehot
 from components.critic.critic import Critic
 from components.episode_buffer import EpisodeBatch
 import torch as th
+import torch.nn.functional as F
 from torch.optim import Adam
 
 from env.protocol_simulator import rev_list_onehot
@@ -71,6 +72,7 @@ class SeparateLearner:
         # print("identifier_outs_shape: {}".format(identifier_outs.shape))
         # print("identifier_outs: {}".format(identifier_outs))
         identifier_outs = th.cat([identifier_outs, 1 - identifier_outs], dim=-1).reshape(bs, b_len, self.n_peers, 2)
+        identifier_outs = F.softmax(identifier_outs, dim=-1)  # TODO: This is bad
         # print("identifier_outs_shape: {}".format(identifier_outs.shape))
         # print("stacked_identifier_outs: {}".format(identifier_outs[0][0]))
         # (bs,t,n,n_actions), Q values of n_actions
