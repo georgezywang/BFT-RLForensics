@@ -165,7 +165,7 @@ class ProtocolSimulator(MultiAgentEnv):
 
     def _check_identifier_correctness(self, choices):
         correct = sum([1 for x in choices if x in self.malicious_ids])
-        incorrect = sum(choices) - len(correct)
+        incorrect = sum(choices) - len([1 for x in choices if x in self.malicious_ids])
         status = False
         if correct >= self.args.f+1:
             self.attacker_reward += correct * self.args.attacker_reward_correct_detection + incorrect * self.args.attacker_reward_incorrect_detection
