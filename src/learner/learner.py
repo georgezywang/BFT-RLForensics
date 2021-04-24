@@ -113,6 +113,7 @@ class SeparateLearner:
         for idx in range(num_action_types-1):
             out = th.stack([attacker_outs[t][idx] for t in range(len(attacker_outs))], dim=1)  # [bs, t, max_msg, num_action]
             print(out.shape)
+            print(attacker_actions[idx])
             out = th.gather(out[:, :-1], dim=3, index=attacker_actions[idx].unsqueeze(3)).squeeze(3)
             out[attacker_mask == 0] = 1.0
             pi.append(out)
