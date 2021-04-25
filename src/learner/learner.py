@@ -84,23 +84,23 @@ class SeparateLearner:
         # print(identifier_actions)
         identifier_actions = identifier_actions.unsqueeze(3).type(th.int64).to(self.device)
         # print("identifier_actions_shape: {}".format(identifier_actions.shape))
-        # print("identifier_actions: {}".format(identifier_actions[0][0]))
+        print("identifier_actions: {}".format(identifier_actions[0][0]))
         identifier_chosen_action_pi = th.gather(identifier_outs[:, :-1], dim=3, index=identifier_actions).squeeze(
             3)  # Remove the last dim
-        # print("identifier_chosen_action_pi: {}".format(identifier_chosen_action_pi[0][0]))
+        print("identifier_chosen_action_pi: {}".format(identifier_chosen_action_pi[0][0]))
         identifier_mask = mask.clone().repeat(1, 1, self.n_peers)
-        # print("identifier_mask: {}".format(identifier_mask[0][0]))
+        print("identifier_mask: {}".format(identifier_mask[0][0]))
         identifier_chosen_action_pi[identifier_mask == 0] = 1.0
-        # print("identifier_chosen_action_pi after mask: {}".format(identifier_chosen_action_pi[0][1]))
+        print("identifier_chosen_action_pi after mask: {}".format(identifier_chosen_action_pi[0][1]))
         log_identifier_pi = th.log(identifier_chosen_action_pi).sum(dim=-1)
-        # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
+        print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
 
         identifier_critic = mask.clone().reshape(-1)
         identifier_loss = ((q_vals[:, :, 1].reshape(-1).detach() * log_identifier_pi.reshape(
             -1)) * identifier_critic).sum() / identifier_critic.sum()
-        # print("q_vals 001: {}".format(q_vals[0][0][1]))
-        # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
-        # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[0]))
+        print("q_vals 001: {}".format(q_vals[0][0][1]))
+        print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
+        print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[0]))
         # print("q_vals 011: {}".format(q_vals[0][1][1]))
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][1]))
         # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[1]))
