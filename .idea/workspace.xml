@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d609e81d-e11f-41d4-b424-787c505a44d8" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/config/envs/pbft_interactive.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/default.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/default.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/logging.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/logging.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/envs/pbft.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/envs/pbft.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,18 +30,19 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/components" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/config/envs" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\harri\Desktop\Research\BFT-RFForensics\src\components" />
-      <recent name="C:\Users\harri\Desktop\Research\BFT-RFForensics\BFT-RFForensics\RF_Module\src\module\agents\rl_agents" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\harri\Desktop\Research\BFT-RFForensics\src\module" />
       <recent name="C:\Users\harri\Desktop\Research\BFT-RFForensics\src\protocols\PBFT" />
       <recent name="C:\Users\harri\Desktop\Research\BFT-RFForensics\BFT-RFForensics\RF_Module\src\" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\harri\Desktop\Research\BFT-RFForensics\src\config\envs" />
+      <recent name="C:\Users\harri\Desktop\Research\BFT-RFForensics\src\components" />
+      <recent name="C:\Users\harri\Desktop\Research\BFT-RFForensics\BFT-RFForensics\RF_Module\src\module\agents\rl_agents" />
     </key>
   </component>
   <component name="SvnConfiguration">
