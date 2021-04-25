@@ -143,7 +143,7 @@ class ProtocolSimulator(MultiAgentEnv):
         self.identifier_reward = 0
 
         attacker_action, identifier_action = actions
-        if isinstance(attacker_action, torch.Tensor):  
+        if isinstance(attacker_action, torch.Tensor):
             attacker_action = attacker_action.cpu().numpy()
         if isinstance(identifier_action, torch.Tensor):
             identifier_action = identifier_action.cpu().numpy()

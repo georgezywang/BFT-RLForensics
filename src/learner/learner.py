@@ -158,10 +158,10 @@ class SeparateLearner:
             self._update_targets()
             self.last_target_update_step = self.critic_training_steps
 
-        print("identifier_actor_loss： {}".format(identifier_loss.item()))
-        print("identifier_grad_norm: {}".format(identifier_grad_norm.item()))
-        print("attacker_actor_loss: {}".format(attacker_loss.item()))
-        print("attacker_grad_norm: {}".format(attacker_grad_norm.item()))
+        # print("identifier_actor_loss： {}".format(identifier_loss.item()))
+        # print("identifier_grad_norm: {}".format(identifier_grad_norm.item()))
+        # print("attacker_actor_loss: {}".format(attacker_loss.item()))
+        # print("attacker_grad_norm: {}".format(attacker_grad_norm.item()))
 
         if t_env - self.log_stats_t >= self.args.learner_log_interval:
             ts_logged = len(critic_train_stats["critic_loss"])
