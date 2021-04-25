@@ -26,7 +26,7 @@ class Logger:
         self.use_tb = True
 
         from tensorboardX import SummaryWriter
-        self.writer=SummaryWriter(directory_name+"-latent")
+        self.writer=SummaryWriter(directory_name+"-game")
 
     def setup_sacred(self, sacred_run_dict):
         self.sacred_info = sacred_run_dict.info
