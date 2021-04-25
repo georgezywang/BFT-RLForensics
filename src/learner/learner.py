@@ -349,18 +349,9 @@ class SeparateLearner:
 
 
 def list_rev_onehot(x):  # for certificates
-    ret = []
-    for idx in range(len(x) // 2):
-        if x[2 * idx] == 1:  # chosen
-            ret.append(1)
-        else:
-            ret.append(0)
-    return ret
+    return x.reshape(-1, 2).argmax(dim=-1)
 
 
 def rev_onehot(x):  # anyvalue if invalid, will be masked out
     # print(x)
-    for idx in range(len(x)):
-        if x[idx] == 1:
-            return idx
-    return 0
+    return x.argmax()
