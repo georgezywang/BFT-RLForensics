@@ -81,7 +81,7 @@ class SeparateLearner:
 
         # Pick the Q-Values for the actions taken by each agent
         # print(identifier_actions)
-        identifier_actions = identifier_actions.unsqueeze(3).type(th.int64)
+        identifier_actions = identifier_actions.unsqueeze(3).type(th.int64).to(device)
         # print("identifier_actions_shape: {}".format(identifier_actions.shape))
         # print("identifier_actions: {}".format(identifier_actions[0][0]))
         identifier_chosen_action_pi = th.gather(identifier_outs[:, :-1], dim=3, index=identifier_actions).squeeze(
@@ -121,7 +121,8 @@ class SeparateLearner:
             # print(attacker_actions[idx])
             # print(out.is_cuda)
             # print(attacker_actions[idx].is_cuda)
-            out = th.gather(out[:, :-1], dim=3, index=attacker_actions[idx].unsqueeze(3)).squeeze(3)
+            attacker_action = attacker_actions[idx].unsqueeze(3).to(device)
+            out = th.gather(out[:, :-1], dim=3, index=attacker_action).squeeze(3)
             out[attacker_mask == 0] = 1.0
             pi.append(out)
         pi = th.cat(pi, dim=-1)
@@ -130,7 +131,8 @@ class SeparateLearner:
         for r_id in range(self.n_peers):  # ([bs, max_msg_num, 2])*n_peers
             out = th.stack([attacker_outs[t][-1][r_id] for t in range(len(attacker_outs))],
                            dim=1)  # [bs, t, max_msg, 2]
-            out = th.gather(out[:, :-1], dim=3, index=attacker_actions[-1][r_id].unsqueeze(3)).squeeze(3)
+            attacker_action = attacker_actions[-1][r_id].unsqueeze(3).to(device)
+            out = th.gather(out[:, :-1], dim=3, index=attacker_action).squeeze(3)
             out[attacker_mask == 0] = 1.0
             cert_pi.append(out)
         cert_pi = th.cat(cert_pi, dim=-1)
@@ -243,7 +245,7 @@ class SeparateLearner:
                         parsed_actions_t_msg.append(parsed_actions[bs_idx][t_idx][msg_idx][idx])
                     parsed_actions_t.append(parsed_actions_t_msg)
                 parsed_actions_idx.append(parsed_actions_t)
-            ret.append(th.tensor(parsed_actions_idx, dtype=th.int64).to(device))
+            ret.append(th.tensor(parsed_actions_idx, dtype=th.int64))
             # ret.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
 
         ret_cert = []
@@ -257,7 +259,7 @@ class SeparateLearner:
                         parsed_actions_t_msg.append(parsed_actions[bs_idx][t_idx][msg_idx][-1][idx])
                     parsed_actions_t.append(parsed_actions_t_msg)
                 parsed_actions_idx.append(parsed_actions_t)
-            ret_cert.append(th.tensor(parsed_actions_idx, dtype=th.int64).to(device))
+            ret_cert.append(th.tensor(parsed_actions_idx, dtype=th.int64))
             # ret_cert.append(th.tensor(copy.deepcopy(parsed_actions_idx), dtype=th.long))
 
         ret.append(ret_cert)

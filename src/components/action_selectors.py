@@ -73,7 +73,7 @@ class EpsilonGreedyAttackerActionSelector():
             random_numbers = torch.rand_like(input_q_vals[:, :, 0])
             pick_random = (random_numbers < self.epsilon).long()
             probs = torch.tensor([1 / num_choices] * num_choices)
-            choices = input_q_vals.max(dim=2)[1]
+            choices = input_q_vals.max(dim=2)[1].to("cpu")
             random_actions = Categorical(probs).sample(choices.shape).long().to(device)
             # print(random_actions.is_cuda)
             # print(choices.is_cuda)
@@ -87,7 +87,7 @@ class EpsilonGreedyAttackerActionSelector():
             random_numbers = torch.rand_like(agent_inputs[-1][c_id][:, :, 0])
             pick_random = (random_numbers < self.epsilon).long()
             probs = torch.tensor([1 / num_choices] * num_choices)
-            choices = agent_inputs[-1][c_id].max(dim=2)[1]
+            choices = agent_inputs[-1][c_id].max(dim=2)[1].to("cpu")
             random_actions = Categorical(probs).sample(choices.shape).long().to(device)
             picked_actions = pick_random * random_actions + (1 - pick_random) * choices
             picked_sigs.append(torch.eye(num_choices)[picked_actions])
