@@ -11,6 +11,6 @@ target_update_interval: 200
 agent_output_type: "q"
 
 rnn_hidden_dim: 128  # Size of hidden state for default rnn agent
-use_cuda: True # Use gpu by default unless it isn't available
+use_cuda: False # Use gpu by default unless it isn't available
 
 name: "separate_actor_critic"
