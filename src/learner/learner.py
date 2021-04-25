@@ -359,7 +359,7 @@ def list_rev_onehot(x):  # for certificates
 
 
 def rev_onehot(x):  # anyvalue if invalid, will be masked out
-    print(x)
+    # print(x)
     for idx in range(len(x)):
         if x[idx] == 1:
             return idx
