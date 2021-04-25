@@ -339,4 +339,4 @@ def list_rev_onehot(x):  # for certificates
 
 def rev_onehot(x):  # anyvalue if invalid, will be masked out
     # print(x)
-    return x.argmax()
+    return x.argmax().unsqueeze(0)

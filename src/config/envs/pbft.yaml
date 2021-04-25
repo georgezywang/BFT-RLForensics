@@ -40,7 +40,7 @@ attacker_reward_incorrect_detection: 0
 attacker_reward_invalid_certificate: -0.01
 
 # game
-terminate_after_consensus_breached: False
+terminate_after_consensus_breached: True
 steps_per_new_client_request: 5
 
 # client vals (break things if changed)
