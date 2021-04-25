@@ -235,16 +235,14 @@ class SeparateLearner:
             parsed_actions.append(th.cat(parsed_actions_t, dim=0).unsqueeze(0))
 
         parsed_actions = th.cat(parsed_actions, dim=0)
-        print(parsed_actions.shape)
-        num_msg_type = 10
-        ret = list(th.split(parsed_actions, [num_msg_type,
-                                             self.args.num_malicious,
-                                             self.args.max_view_num,
-                                             self.args.max_seq_num,
-                                             self.args.total_client_vals,
-                                             self.args.n_peers,
-                                             self.args.n_peers * 2], dim=-1))
-        ret_cert = list(ret[-1].split(2, dim=-1))
+        ret = list(th.split(parsed_actions, [1,
+                                             1,
+                                             1,
+                                             1,
+                                             1,
+                                             1,
+                                             4], dim=-1))
+        ret_cert = list(ret[-1].split(1, dim=-1))
         ret = list(ret[:-1])
         ret.append(ret_cert)
         return ret
