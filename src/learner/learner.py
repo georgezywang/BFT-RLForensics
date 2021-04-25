@@ -124,7 +124,7 @@ class SeparateLearner:
             # print(attacker_actions[idx].is_cuda)
             attacker_action = attacker_actions[idx]
             out = th.gather(out[:, :-1], dim=3, index=attacker_action).squeeze(3)
-            print("attacker out shape: {}".format(out.shape))
+            # print("attacker out shape: {}".format(out.shape))
             out[attacker_mask == 0] = 1.0
             pi.append(out)
         pi = th.cat(pi, dim=-1)
@@ -135,14 +135,14 @@ class SeparateLearner:
                            dim=1)  # [bs, t, max_msg, 2]
             attacker_action = attacker_actions[-1][r_id]
             out = th.gather(out[:, :-1], dim=3, index=attacker_action).squeeze(3)
-            print("attacker out shape: {}".format(out.shape))
+            # print("attacker out shape: {}".format(out.shape))
             out[attacker_mask == 0] = 1.0
             cert_pi.append(out)
         cert_pi = th.cat(cert_pi, dim=-1)
         pi = th.cat([pi, cert_pi], dim=-1)
         log_attacker_pi = th.log(pi).sum(-1)
-        print("q_vals: {}".format(q_vals.shape))
-        print("log_attacker_pi: {}".format(log_attacker_pi.shape))
+        # print("q_vals: {}".format(q_vals.shape))
+        # print("log_attacker_pi: {}".format(log_attacker_pi.shape))
         # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[1]))
 
         attacker_critic = mask.clone().reshape(-1)
@@ -162,7 +162,10 @@ class SeparateLearner:
             ts_logged = len(critic_train_stats["critic_loss"])
             for key in ["critic_loss", "critic_grad_norm", "td_error_abs", "q_taken_mean", "target_mean"]:
                 self.logger.log_stat(key, sum(critic_train_stats[key]) / ts_logged, t_env)
-
+            print("identifier_actor_loss： {}".format(identifier_loss.item()))
+            print("identifier_grad_norm: {}".format(identifier_grad_norm))
+            print("attacker_actor_loss: {}".format(attacker_loss.item()))
+            print("attacker_grad_norm: {}".format(attacker_grad_norm))
             self.logger.log_stat("identifier_actor_loss", identifier_loss.item(), t_env)
             self.logger.log_stat("identifier_grad_norm", identifier_grad_norm, t_env)
             self.logger.log_stat("attacker_actor_loss", attacker_loss.item(), t_env)
