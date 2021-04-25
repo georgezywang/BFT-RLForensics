@@ -28,13 +28,13 @@ max_message_num_per_round: 1
 
 episode_limit: 100
 
-# reward
+# reward (make two players independent -> too sparse?)
 identifier_reward_consensus_reached: 0
 attacker_reward_consensus_reached: 0
-identifier_reward_consensus_breached: -0.5
-attacker_reward_consensus_breached: 0.5
+identifier_reward_consensus_breached: 0 # -0.5
+attacker_reward_consensus_breached: 5
 identifier_reward_correct_detection: 0.5
-attacker_reward_correct_detection: -0.3
+attacker_reward_correct_detection: 0 # -0.3
 identifier_reward_incorrect_detection: -2
 attacker_reward_incorrect_detection: 0
 attacker_reward_invalid_certificate: -0.01
