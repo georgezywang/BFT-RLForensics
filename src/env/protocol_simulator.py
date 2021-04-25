@@ -143,9 +143,9 @@ class ProtocolSimulator(MultiAgentEnv):
         self.identifier_reward = 0
 
         attacker_action, identifier_action = actions
-        if isinstance(attacker_action, torch.Tensor) and self.args.use_cuda:  # TODO: bad
+        if isinstance(attacker_action, torch.Tensor):  
             attacker_action = attacker_action.cpu().numpy()
-        if isinstance(identifier_action, torch.Tensor) and self.args.use_cuda:
+        if isinstance(identifier_action, torch.Tensor):
             identifier_action = identifier_action.cpu().numpy()
         attacker_messages, identifier_choices = self._parse_actions(attacker_action, identifier_action)
         self.total_msgs_per_round.extend(attacker_messages)
