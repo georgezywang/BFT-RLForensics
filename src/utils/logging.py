@@ -58,7 +58,7 @@ class Logger:
                 continue
             i += 1
             window = 5 if k != "epsilon" else 1
-            self.stats[k][-window:] = [x.to("cpu").numpy() for x in self.stats[k][-window:] if isinstance(x, torch.Tensor)]
+            # self.stats[k][-window:] = [x.to("cpu").numpy() for x in self.stats[k][-window:] if isinstance(x, torch.Tensor)]
             item = "{:.4f}".format(np.mean([x[1] for x in self.stats[k][-window:]]))
             log_str += "{:<25}{:>8}".format(k + ":", item)
             log_str += "\n" if i % 4 == 0 else "\t"
