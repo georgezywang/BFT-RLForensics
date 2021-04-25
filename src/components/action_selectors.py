@@ -70,26 +70,26 @@ class EpsilonGreedyAttackerActionSelector():
         picked = []  # HUH, probably everythin here is not necessary
         for input_q_vals in agent_inputs[:-1]:
             num_choices = input_q_vals.size(-1)
-            random_numbers = torch.rand_like(input_q_vals[:, :, 0])
+            random_numbers = torch.rand_like(input_q_vals[:, :, 0]).to("cpu")
             pick_random = (random_numbers < self.epsilon).long()
             probs = torch.tensor([1 / num_choices] * num_choices)
-            choices = input_q_vals.max(dim=2)[1].to("cpu")
+            choices = input_q_vals.max(dim=2)[1]
             random_actions = Categorical(probs).sample(choices.shape).long()
             # print(random_actions.is_cuda)
             # print(choices.is_cuda)
-            picked_actions = pick_random * random_actions + (1 - pick_random) * choices
+            picked_actions = pick_random * random_actions + (1 - pick_random) * choices.to("cpu")
             picked.append(torch.eye(num_choices)[picked_actions])
             # print(num_choices)
 
         picked_sigs = []
         for c_id in range(self.args.n_peers):  # ([bs, max_msg_num, 2])*n_peers
             num_choices = agent_inputs[-1][c_id].size(-1)  # 2
-            random_numbers = torch.rand_like(agent_inputs[-1][c_id][:, :, 0])
+            random_numbers = torch.rand_like(agent_inputs[-1][c_id][:, :, 0]).to("cpu")
             pick_random = (random_numbers < self.epsilon).long()
             probs = torch.tensor([1 / num_choices] * num_choices)
-            choices = agent_inputs[-1][c_id].max(dim=2)[1].to("cpu")
+            choices = agent_inputs[-1][c_id].max(dim=2)[1]
             random_actions = Categorical(probs).sample(choices.shape).long()
-            picked_actions = pick_random * random_actions + (1 - pick_random) * choices
+            picked_actions = pick_random * random_actions + (1 - pick_random) * choices.to("cpu")
             picked_sigs.append(torch.eye(num_choices)[picked_actions])
 
         picked_sigs = torch.cat(picked_sigs, dim=-1)
