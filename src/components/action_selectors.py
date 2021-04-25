@@ -130,26 +130,3 @@ class EpsilonGreedyIdentifierActionSelector():
 
 REGISTRY["epsilon_greedy"] = EpsilonGreedyActionSelector
 
-
-def onehot(x, n):
-    ret = [0] * n
-    if x != float("inf") and 0 <= x < n:
-        ret[x] = 1
-    return ret
-
-
-def rev_onehot(x):
-    for idx in range(len(x)):
-        if x[idx] == 1:
-            return idx
-    return -1
-
-
-def list_onehot(x, n):  # for certificate
-    ret = []
-    for idx in range(n):
-        if idx in x:  # chosen
-            ret.extend([1, 0])
-        else:
-            ret.extend([0, 1])
-    return ret

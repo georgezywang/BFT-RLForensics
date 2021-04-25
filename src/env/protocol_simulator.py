@@ -1,6 +1,7 @@
 import copy
 import random
 import numpy as np
+import torch
 
 from env.multiagentenv import MultiAgentEnv
 from protocols.PBFT.log import ClientLog
@@ -427,6 +428,8 @@ def onehot(x, n):
 
 
 def rev_onehot(x):
+    if isinstance(x, torch.Tensor):
+        return x.argmax()
     for idx in range(len(x)):
         if x[idx] == 1:
             return idx
@@ -444,6 +447,8 @@ def list_onehot(x, n):  # for certificate
 
 
 def rev_list_onehot(x):  # for certificates
+    if isinstance(x, torch.Tensor):
+        return x.reshape(-1, 2).argmax(dim=-1)
     ret = []
     for idx in range(len(x) // 2):
         if x[2 * idx] == 1:  # chosen
