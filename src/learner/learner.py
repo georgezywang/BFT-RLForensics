@@ -7,13 +7,14 @@ import torch.nn.functional as F
 from torch.optim import Adam
 
 from utils.rl_utils import build_td_lambda_targets
-device = th.device("cuda:0" if th.cuda.is_available() else "cpu")
+
 
 class SeparateLearner:
     def __init__(self, mac, scheme, logger, args):
         self.n_peers = args.n_peers
         self.n_agents = args.n_agents
         self.args = args
+        self.device = th.device("cuda:0" if th.cuda.is_available() and self.args.use_cuda else "cpu")
         self.mac = mac
         self.logger = logger
 
@@ -81,7 +82,7 @@ class SeparateLearner:
 
         # Pick the Q-Values for the actions taken by each agent
         # print(identifier_actions)
-        identifier_actions = identifier_actions.unsqueeze(3).type(th.int64).to(device)
+        identifier_actions = identifier_actions.unsqueeze(3).type(th.int64).to(self.device)
         # print("identifier_actions_shape: {}".format(identifier_actions.shape))
         # print("identifier_actions: {}".format(identifier_actions[0][0]))
         identifier_chosen_action_pi = th.gather(identifier_outs[:, :-1], dim=3, index=identifier_actions).squeeze(
@@ -121,7 +122,7 @@ class SeparateLearner:
             # print(attacker_actions[idx])
             # print(out.is_cuda)
             # print(attacker_actions[idx].is_cuda)
-            attacker_action = attacker_actions[idx].unsqueeze(3).to(device)
+            attacker_action = attacker_actions[idx].unsqueeze(3).to(self.device)
             out = th.gather(out[:, :-1], dim=3, index=attacker_action).squeeze(3)
             out[attacker_mask == 0] = 1.0
             pi.append(out)
@@ -131,7 +132,7 @@ class SeparateLearner:
         for r_id in range(self.n_peers):  # ([bs, max_msg_num, 2])*n_peers
             out = th.stack([attacker_outs[t][-1][r_id] for t in range(len(attacker_outs))],
                            dim=1)  # [bs, t, max_msg, 2]
-            attacker_action = attacker_actions[-1][r_id].unsqueeze(3).to(device)
+            attacker_action = attacker_actions[-1][r_id].unsqueeze(3).to(self.device)
             out = th.gather(out[:, :-1], dim=3, index=attacker_action).squeeze(3)
             out[attacker_mask == 0] = 1.0
             cert_pi.append(out)

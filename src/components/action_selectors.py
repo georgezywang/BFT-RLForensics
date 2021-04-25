@@ -6,7 +6,6 @@ from torch.distributions import Categorical
 from .epsilon_schedules import DecayThenFlatSchedule
 
 REGISTRY = {}
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class EpsilonGreedyActionSelector():
 
@@ -51,7 +50,9 @@ class EpsilonGreedyActionSelector():
 class EpsilonGreedyAttackerActionSelector():
 
     def __init__(self, args):
+
         self.args = args
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() and self.args.use_cuda else "cpu")
 
         self.schedule = DecayThenFlatSchedule(args.epsilon_start, args.epsilon_finish, args.epsilon_anneal_time,
                                               decay="linear")
@@ -105,7 +106,7 @@ class EpsilonGreedyIdentifierActionSelector():
 
     def __init__(self, args):
         self.args = args
-
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() and self.args.use_cuda else "cpu")
         self.schedule = DecayThenFlatSchedule(args.epsilon_start, args.epsilon_finish, args.epsilon_anneal_time,
                                               decay="linear")
         self.epsilon = self.schedule.eval(0)
@@ -122,7 +123,7 @@ class EpsilonGreedyIdentifierActionSelector():
         random_numbers = torch.rand_like(agent_inputs)
         pick_random = (random_numbers < self.epsilon).long()
         probs = torch.tensor([1 / num_choices] * num_choices)
-        random_actions = Categorical(probs).sample(agent_inputs.shape).long().to(device)
+        random_actions = Categorical(probs).sample(agent_inputs.shape).long().to(self.device)
         picked_actions = pick_random * random_actions + (1 - pick_random) * agent_inputs.ge(0.5).long()
 
         return picked_actions
