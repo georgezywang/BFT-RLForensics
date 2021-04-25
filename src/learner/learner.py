@@ -158,18 +158,20 @@ class SeparateLearner:
             self._update_targets()
             self.last_target_update_step = self.critic_training_steps
 
+        print("identifier_actor_loss： {}".format(identifier_loss.item()))
+        print("identifier_grad_norm: {}".format(identifier_grad_norm.item()))
+        print("attacker_actor_loss: {}".format(attacker_loss.item()))
+        print("attacker_grad_norm: {}".format(attacker_grad_norm.item()))
+
         if t_env - self.log_stats_t >= self.args.learner_log_interval:
             ts_logged = len(critic_train_stats["critic_loss"])
             for key in ["critic_loss", "critic_grad_norm", "td_error_abs", "q_taken_mean", "target_mean"]:
                 self.logger.log_stat(key, sum(critic_train_stats[key]) / ts_logged, t_env)
-            print("identifier_actor_loss： {}".format(identifier_loss.item()))
-            print("identifier_grad_norm: {}".format(identifier_grad_norm))
-            print("attacker_actor_loss: {}".format(attacker_loss.item()))
-            print("attacker_grad_norm: {}".format(attacker_grad_norm))
+
             self.logger.log_stat("identifier_actor_loss", identifier_loss.item(), t_env)
-            self.logger.log_stat("identifier_grad_norm", identifier_grad_norm, t_env)
+            self.logger.log_stat("identifier_grad_norm", identifier_grad_norm.item(), t_env)
             self.logger.log_stat("attacker_actor_loss", attacker_loss.item(), t_env)
-            self.logger.log_stat("attacker_grad_norm", attacker_grad_norm, t_env)
+            self.logger.log_stat("attacker_grad_norm", attacker_grad_norm.item(), t_env)
             self.log_stats_t = t_env
 
     def _train_critic(self, batch, rewards, terminated, mask):
@@ -217,7 +219,7 @@ class SeparateLearner:
         }
 
         running_log["critic_loss"].append(loss.item())
-        running_log["critic_grad_norm"].append(grad_norm)
+        running_log["critic_grad_norm"].append(grad_norm.item())
         mask_elems = mask_t.sum().item()
         running_log["td_error_abs"].append((masked_td_error.abs().sum().item() / mask_elems))
         running_log["q_taken_mean"].append((q_vals.reshape(-1) * mask_t.reshape(-1)).sum().item() / mask_elems)
