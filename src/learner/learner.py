@@ -234,7 +234,8 @@ class SeparateLearner:
                 parsed_actions_t.append(parsed_actions_t_msg)
             parsed_actions.append(parsed_actions_t)
 
-        parsed_actions = th.tensor(parsed_actions, dtype=th.int64)
+        print(parsed_actions)
+        parsed_actions = th.tensor(parsed_actions)
         num_msg_type = 10
         ret = list(th.split(parsed_actions, [num_msg_type,
                                              self.args.num_malicious,
