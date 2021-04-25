@@ -294,7 +294,7 @@ class SeparateLearner:
         # print("certificate shape: {}".format(certificate_input.shape))
         # print("c id: {}".format(certificate_input))
         # print("c id: {}".format(list_rev_onehot(certificate_input)))
-        # print("msg: {}".format(msg))
+        print("msg: {}".format(msg))
         msg = th.cat(msg, dim=-1)
 
         return msg
