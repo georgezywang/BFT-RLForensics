@@ -230,12 +230,11 @@ class SeparateLearner:
             for t_idx in range(t_len):
                 parsed_actions_t_msg = []
                 for msg_idx in range(total_msgs_num):
-                    parsed_actions_t_msg.append(self._parse_input_message(actions[bs_idx][t_idx][msg_idx]))
-                parsed_actions_t.append(parsed_actions_t_msg)
-            parsed_actions.append(parsed_actions_t)
-
-        print(parsed_actions)
-        parsed_actions = th.tensor(parsed_actions)
+                    parsed_actions_t_msg.append(self._parse_input_message(actions[bs_idx][t_idx][msg_idx]).unsqueeze(0))
+                parsed_actions_t.append(th.cat(parsed_actions_t_msg, dim=0).unsqueeze(0))
+            parsed_actions.append(th.cat(parsed_actions_t, dim=0).unsqueeze(0))
+        
+        parsed_actions = th.cat(parsed_actions, dim=0)
         num_msg_type = 10
         ret = list(th.split(parsed_actions, [num_msg_type,
                                              self.args.num_malicious,
