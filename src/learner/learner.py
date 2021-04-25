@@ -48,7 +48,7 @@ class SeparateLearner:
         attacker_actions = batch["attacker_action"][:, :-1]
         # print(attacker_actions)
         attacker_actions = self._parse_attacker_actions(attacker_actions)
-        print("done with action parsing")
+        # print("done with action parsing")
         # print(attacker_actions)
         terminated = batch["terminated"][:, :-1].float()
         mask = batch["filled"][:, :-1].float()  # [bs, t-1, 1]
