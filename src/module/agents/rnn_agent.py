@@ -9,19 +9,21 @@ class RNNAgent(nn.Module):
 
         self.fc1 = nn.Linear(input_shape, args.rnn_hidden_dim)
         self.rnn = nn.GRUCell(args.rnn_hidden_dim, args.rnn_hidden_dim)
-        # self.fc3 = nn.Linear(args.rnn_hidden_dim, args.rnn_hidden_dim)
-        self.fc2 = nn.Linear(args.rnn_hidden_dim, output_shape)
+        self.fc2 = nn.Linear(args.rnn_hidden_dim, args.rnn_hidden_dim)
+        self.fc3 = nn.Linear(args.rnn_hidden_dim, output_shape)
 
     def init_hidden(self):
         # make hidden states on same device as model
         return self.fc1.weight.new(1, self.args.rnn_hidden_dim).zero_()
 
     def forward(self, inputs, hidden_state):
-        x = F.relu(self.fc1(inputs))
+        # x = F.relu(self.fc1(inputs))
+        x = self.fc1(inputs)
         h_in = hidden_state.reshape(-1, self.args.rnn_hidden_dim)
         h = self.rnn(x, h_in)
         # h = F.relu(self.fc3(h))
         q = self.fc2(h)
+        q = self.fc3(q)
         # print("q shape: {}".format(q.shape))
         # print("h shape: {}".format(h.shape))
         return q, h

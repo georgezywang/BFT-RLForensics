@@ -10,23 +10,23 @@ num_transcripts_avail: 2
 
 #initialization (break things if they are not set to 0)
 initialized_seq_num: 0
-max_seq_num: 10
+max_seq_num: 5
 initialized_view_num: 0
-max_view_num: 10  # make sure not possible to exceed
+max_view_num: 5  # make sure not possible to exceed
 initialized_primary: 0
 
-work_window_size: 10
-idle_timer_limit: 10
-commit_timer_limit: 10
-view_change_duration: 10
+work_window_size: 2
+idle_timer_limit: 20
+commit_timer_limit: 20
+view_change_duration: 15
 simulator_id: 25
 
 # both received and send
-max_message_num_per_round: 2
+max_message_num_per_round: 1
 
 # specify obs size and action size
 
-episode_limit: 40
+episode_limit: 100
 
 # reward
 identifier_reward_consensus_reached: 0
@@ -44,6 +44,6 @@ terminate_after_consensus_breached: False
 steps_per_new_client_request: 5
 
 # client vals (break things if changed)
-total_client_vals: 4
+total_client_vals: 2
 
 n_agents: 2

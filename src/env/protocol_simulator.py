@@ -11,7 +11,7 @@ from protocols.PBFT.replica import PBFTagent, PBFTagent_wrapper
 # player 0: attacker
 # player 1: identifier
 
-client_vals = [0, 1, 2, 3]
+client_vals = [0, 1]
 consensus_status = {"violated": 0,
                     "normal": 1}
 type_dict = {"PrePrepare": 0,
@@ -91,6 +91,8 @@ class ProtocolSimulator(MultiAgentEnv):
         self._send_messages_to_replica_buffers()
 
     def _create_new_client_request(self):
+        if self.client_request_seq_num > self.args.max_seq_num:
+            return
         self.client_request_seq_num += 1
         self.client_request_vals[self.client_request_seq_num] = random.choice(client_vals)
         params = {"msg_type": "Client",
@@ -139,12 +141,11 @@ class ProtocolSimulator(MultiAgentEnv):
         self.round_counter += 1
         self.attacker_reward = 0
         self.identifier_reward = 0
-        terminated = False
 
         attacker_action, identifier_action = actions
-        if isinstance(attacker_action, torch.Tensor):
+        if isinstance(attacker_action, torch.Tensor) and self.args.use_cuda:  # TODO: bad
             attacker_action = attacker_action.cpu().numpy()
-        if isinstance(identifier_action, torch.Tensor):
+        if isinstance(identifier_action, torch.Tensor) and self.args.use_cuda:
             identifier_action = identifier_action.cpu().numpy()
         attacker_messages, identifier_choices = self._parse_actions(attacker_action, identifier_action)
         self.total_msgs_per_round.extend(attacker_messages)
@@ -159,10 +160,9 @@ class ProtocolSimulator(MultiAgentEnv):
         rewards = [self.attacker_reward, self.identifier_reward]
 
         if self.args.terminate_after_consensus_breached:
-            terminated = (status == consensus_status["violated"] or self.round_counter >= self.args.episode_limit
-                          or self.client_request_seq_num > self.args.max_seq_num)
+            terminated = (status == consensus_status["violated"] or self.round_counter >= self.args.episode_limit)
         else:
-            terminated = (self.round_counter >= self.args.episode_limit or self.client_request_seq_num > self.args.max_seq_num)
+            terminated = (self.round_counter >= self.args.episode_limit)
         terminated = terminated or identification_status
         env_info = {}
 
