@@ -122,7 +122,7 @@ class SeparateLearner:
             # print(attacker_actions[idx])
             # print(out.is_cuda)
             # print(attacker_actions[idx].is_cuda)
-            attacker_action = attacker_actions[idx].unsqueeze(3)
+            attacker_action = attacker_actions[idx]
             out = th.gather(out[:, :-1], dim=3, index=attacker_action).squeeze(3)
             out[attacker_mask == 0] = 1.0
             pi.append(out)
@@ -132,7 +132,7 @@ class SeparateLearner:
         for r_id in range(self.n_peers):  # ([bs, max_msg_num, 2])*n_peers
             out = th.stack([attacker_outs[t][-1][r_id] for t in range(len(attacker_outs))],
                            dim=1)  # [bs, t, max_msg, 2]
-            attacker_action = attacker_actions[-1][r_id].unsqueeze(3)
+            attacker_action = attacker_actions[-1][r_id]
             out = th.gather(out[:, :-1], dim=3, index=attacker_action).squeeze(3)
             out[attacker_mask == 0] = 1.0
             cert_pi.append(out)
