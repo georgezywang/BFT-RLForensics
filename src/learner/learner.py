@@ -58,7 +58,7 @@ class SeparateLearner:
 
         rewards = (attacker_rewards, identifier_rewards)
         q_vals, critic_train_stats = self._train_critic(batch, rewards, terminated, critic_mask)  # [bs, t, 2]
-        print("done with critic")
+        # print("done with critic")
 
         # Calculate estimated Q-Values
         attacker_outs = []
@@ -97,9 +97,9 @@ class SeparateLearner:
         identifier_critic = mask.clone().reshape(-1)
         identifier_loss = ((q_vals[:, :, 1].reshape(-1).detach() * log_identifier_pi.reshape(
             -1)) * identifier_critic).sum() / identifier_critic.sum()
-        print("q_vals 001: {}".format(q_vals[0][0][1]))
-        print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
-        print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[0]))
+        # print("q_vals 001: {}".format(q_vals[0][0][1]))
+        # print("log_identifier_pi: {}".format(log_identifier_pi[0][0]))
+        # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[0]))
         # print("q_vals 011: {}".format(q_vals[0][1][1]))
         # print("log_identifier_pi: {}".format(log_identifier_pi[0][1]))
         # print("q_vals * log_identifier_pi: {}".format((q_vals[:, :, 1].reshape(-1) * log_identifier_pi.reshape(-1))[1]))
@@ -109,7 +109,7 @@ class SeparateLearner:
         identifier_loss.backward()
         identifier_grad_norm = th.nn.utils.clip_grad_norm_(self.identifier_params, self.args.grad_norm_clip)
         self.identifier_optimiser.step()
-        print("done with identifier")
+        # print("done with identifier")
         num_action_types = len(attacker_outs[0])
         total_msgs_num = self.args.num_malicious * self.args.max_message_num_per_round
         attacker_mask = mask.clone().repeat(1, 1, total_msgs_num)
@@ -146,7 +146,7 @@ class SeparateLearner:
         attacker_loss.backward()
         attacker_grad_norm = th.nn.utils.clip_grad_norm_(self.attacker_params, self.args.grad_norm_clip)
         self.attacker_optimiser.step()
-        print("done with attacker")
+        # print("done with attacker")
 
         if (self.critic_training_steps - self.last_target_update_step) / self.args.target_update_interval >= 1.0:
             self._update_targets()
