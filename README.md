@@ -3,8 +3,8 @@
 ## Setup and Running
 To set up the prerequisites including Tensorboard visualization, run:
 ```bash
-pip install -r requirements.txt
-pip install tensorboard
+pip3 install -r requirements.txt
+pip3 install tensorboard
 ```
 To train agents with cpu，run:
 ```
